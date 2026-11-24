@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Car wash chain finance pack</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.3/plotly.min.js"></script>
+<script src="data.js"></script>
+<script src="site24.js"></script>
+<style>
+  :root { --bg:#f9f9f7; --card:#fcfcfb; --ink:#0b0b0b; --soft:#52514e; --muted:#898781; --line:#e1e0d9; --axis:#c3c2b7;
+    --blue:#2a78d6; --orange:#eb6834; --grey:#c3c2b7; --good:#008300; --bad:#d03b3b; --goodtext:#006300; --wash:rgba(42,120,214,.10); }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d0d0d; --card:#1a1a19; --ink:#f0efec; --soft:#c3c2b7; --muted:#898781; --line:#2c2c2a; --axis:#383835;
+      --blue:#3987e5; --orange:#d95926; --grey:#55544f; --good:#0ca30c; --bad:#e66767; --goodtext:#0ca30c; --wash:rgba(57,135,229,.16); }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:1240px; margin:0 auto; padding:24px 16px 56px; }
+  h1 { font-size:26px; margin:0 0 4px; }
+  .sub { color:var(--soft); margin:0 0 6px; max-width:75ch; }
+  .madeup { display:inline-block; margin:6px 0 14px; padding:4px 10px; border:1px solid var(--line); border-radius:999px; font-size:13px; color:var(--soft); background:var(--card); }
+  nav { position:sticky; top:0; z-index:5; background:var(--bg); padding:8px 0; margin-bottom:10px; display:flex; flex-wrap:wrap; gap:6px; border-bottom:1px solid var(--line); }
+  nav a { color:var(--soft); text-decoration:none; padding:5px 10px; border-radius:8px; font-size:14px; }
+  nav a:hover { background:var(--wash); color:var(--ink); }
+  h2 { font-size:19px; margin:34px 0 2px; scroll-margin-top:60px; }
+  .lead { color:var(--soft); margin:0 0 12px; max-width:80ch; }
+  .grid { display:grid; grid-template-columns:repeat(12, 1fr); gap:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; min-width:0; }
+  .card h3 { font-size:14px; margin:0 0 2px; }
+  .card p.note { color:var(--soft); font-size:13px; margin:0 0 6px; }
+  .w12 { grid-column:span 12; } .w7 { grid-column:span 7; } .w5 { grid-column:span 5; } .w6 { grid-column:span 6; } .w4 { grid-column:span 4; } .w8 { grid-column:span 8; }
+  @media (max-width: 900px) { .w7, .w5, .w6, .w4, .w8 { grid-column:span 12; } }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:14px; }
+  .tile { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .tile .label { color:var(--soft); font-size:13px; }
+  .tile .value { font-size:26px; font-weight:650; line-height:1.2; margin-top:2px; }
+  .tile .detail { color:var(--soft); font-size:13px; }
+  .plot { height:340px; } .plot.tall { height:560px; }
+  .tablewrap { overflow:auto; max-height:560px; }
+  table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; font-size:14px; }
+  th, td { padding:7px 9px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th:first-child, td:first-child { text-align:left; font-weight:600; }
+  td.flag, th.flag { text-align:left; white-space:normal; min-width:150px; }
+  th { color:var(--soft); font-weight:500; font-size:13px; position:sticky; top:0; background:var(--card); cursor:pointer; user-select:none; }
+  tbody tr { cursor:pointer; } tbody tr:hover { background:var(--wash); } tbody tr.picked { background:var(--wash); }
+  .pill { display:inline-block; padding:1px 8px; border-radius:999px; font-size:12.5px; border:1px solid var(--line); margin:1px 4px 1px 0; }
+  .pill.warn::before { content:"▲ "; color:var(--orange); } .pill.wait::before { content:"● "; color:var(--muted); }
+  .controls { display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin:2px 0 8px; }
+  select { padding:7px 10px; font:14px system-ui, sans-serif; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); }
+  label.slider { display:grid; grid-template-columns:1fr auto; gap:0 10px; font-size:13.5px; color:var(--soft); min-width:230px; flex:1 1 230px; }
+  label.slider b { color:var(--ink); font-variant-numeric:tabular-nums; }
+  label.slider input { grid-column:span 2; width:100%; accent-color:var(--blue); }
+  button { padding:7px 12px; font:14px system-ui, sans-serif; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+  :focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+  .verdict { font-size:15px; margin:10px 0 0; padding:10px 12px; border-left:3px solid var(--blue); background:var(--wash); border-radius:0 8px 8px 0; }
+  .pos { color:var(--goodtext); } .neg { color:var(--bad); }
+  footer { color:var(--soft); font-size:13px; margin-top:28px; max-width:85ch; }
+  footer a { color:var(--blue); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Finance pack for a 23-site car wash chain</h1>
+  <p class="sub">Which sites earn their keep, why profit missed the budget, what a member is worth, what next year looks like, and where to build site 24.</p>
+  <span class="madeup">All data on this page is made up. No real company, site or customer.</span>
+  <nav aria-label="Sections">
+    <a href="#scorecard">1. Site scorecard</a><a href="#budget">2. Budget against actual</a><a href="#members">3. Membership</a><a href="#forecast">4. Forecast</a><a href="#site24">5. Site 24</a>
+  </nav>
+
+  <div class="tiles" id="tiles"></div>
+
+  <h2 id="scorecard">1. Site scorecard</h2>
+  <p class="lead">Profit margin here is site profit (four-wall EBITDA) as a share of revenue, for 2025. Click a site to see its history.</p>
+  <div class="grid">
+    <section class="card w5"><h3>Profit margin by site</h3><p class="note">Orange: something needs fixing. Grey: opened in the last two years and still filling up.</p><div id="marginChart" class="plot tall"></div></section>
+    <section class="card w7"><h3>The numbers</h3><p class="note">Click a heading to sort.</p><div class="tablewrap"><table id="scoreTable"></table></div></section>
+    <section class="card w12">
+      <div class="controls"><h3 id="siteTitle" style="margin:0"></h3>
+        <select id="metric" aria-label="What to show">
+          <option value="profit">Profit by month</option><option value="revenue">Revenue by month</option><option value="members">Members</option>
+          <option value="labour_share">Labour as a share of revenue</option><option value="chemicals_per_car">Chemical cost per car</option><option value="churn">Share of members cancelling</option>
+        </select></div>
+      <p class="note" id="siteNote"></p><div id="siteChart" class="plot"></div>
+    </section>
+  </div>
+
+  <h2 id="budget">2. Budget against actual</h2>
+  <p class="lead">Why 2025 profit differs from the budget, split into pieces that add up exactly. Red pulled profit down, green pushed it up.</p>
+  <div class="grid">
+    <section class="card w12">
+      <div class="controls"><select id="bridgeSite" aria-label="Chain or one site"></select></div>
+      <p class="note" id="bridgeNote"></p><div id="bridge" class="plot"></div>
+    </section>
+  </div>
+
+  <h2 id="members">3. Membership</h2>
+  <p class="lead">Members pay monthly whether or not they wash, so they are the steady part of the business.</p>
+  <div class="tiles" id="memberTiles"></div>
+  <div class="grid" style="margin-top:14px">
+    <section class="card w6"><h3>Members across the chain</h3><p class="note">End of each month.</p><div id="memberChart" class="plot"></div></section>
+    <section class="card w6"><h3>How long new members stay</h3><p class="note">Of everyone who joined, the share still a member this many months later.</p><div id="retention" class="plot"></div></section>
+  </div>
+
+  <h2 id="forecast">4. Forecast</h2>
+  <p class="lead" id="forecastLead"></p>
+  <div class="grid"><section class="card w12"><h3>Monthly revenue: three years of actuals, then the 2026 forecast</h3><div id="forecastChart" class="plot"></div></section></div>
+
+  <h2 id="site24">5. Where should site 24 go?</h2>
+  <p class="lead">Volume for each location is predicted from traffic, competitors and local income, using what the 20 established sites actually do. Move the sliders to test the decision.</p>
+  <div class="grid">
+    <section class="card w12">
+      <div class="controls">
+        <label class="slider">Return the owners require <b id="vRate"></b><input id="sRate" type="range" min="6" max="16" step="0.5"></label>
+        <label class="slider">Volume against the prediction <b id="vVol"></b><input id="sVol" type="range" min="-25" max="25" step="1" value="0"></label>
+        <label class="slider">Build cost against the quote <b id="vCost"></b><input id="sCost" type="range" min="-20" max="30" step="1" value="0"></label>
+        <label class="slider">Sale value after 10 years (times yearly profit) <b id="vExit"></b><input id="sExit" type="range" min="0" max="10" step="0.5"></label>
+        <button id="reset">Reset</button>
+      </div>
+      <div class="tablewrap"><table id="candTable"></table></div>
+      <p class="verdict" id="verdict"></p>
+    </section>
+    <section class="card w12"><h3>Value created over 10 years (NPV)</h3><p class="note">Dot: with the slider settings. Bar: if volume comes in low or high (about a 4 in 5 chance it lands inside).</p><div id="npvChart" class="plot" style="height:260px"></div></section>
+  </div>
+
+  <footer>
+    <p>How to read it: profit is before head-office cost, interest, tax and depreciation. NPV is future cash discounted back to today, minus the build cost; above zero means the project beats the required return. IRR is the yearly return the project earns.</p>
+    <p>Built from a made-up dataset with problems planted in it on purpose, to show the method. Code, Excel model and write-up: <a href="https://github.com/aopejf/ml-from-scratch/tree/main/10_car_wash_finance">github.com/aopejf/ml-from-scratch</a>.</p>
+  </footer>
+</main>
+
+<script>
+const D = window.DATA, Y = D.year;
+const $ = id => document.getElementById(id);
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const money = v => (v < 0 ? "-$" : "$") + (Math.abs(v) >= 1e6 ? (Math.abs(v) / 1e6).toFixed(2) + "m" : Math.abs(v) >= 1e3 ? Math.round(Math.abs(v) / 1e3).toLocaleString() + "k" : Math.round(Math.abs(v)));
+const signed = v => (v >= 0 ? "+" : "-") + money(Math.abs(v));
+const pct = (v, d = 0) => (v * 100).toFixed(d) + "%";
+const whole = v => Math.round(v).toLocaleString();
+const sites = Object.fromEntries(D.scorecard.map(r => [r.site_id, r]));
+
+function layout(extra) {
+  return Object.assign({
+    margin: { l: 56, r: 16, t: 8, b: 40 }, paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: 'system-ui, "Segoe UI", sans-serif', size: 12.5, color: css("--soft") }, showlegend: false,
+    hoverlabel: { bgcolor: css("--card"), bordercolor: css("--axis"), font: { color: css("--ink") } },
+    xaxis: { gridcolor: css("--line"), linecolor: css("--axis"), zerolinecolor: css("--axis") },
+    yaxis: { gridcolor: css("--line"), linecolor: css("--axis"), zerolinecolor: css("--axis") },
+  }, extra);
+}
+const axis = extra => Object.assign({ gridcolor: css("--line"), linecolor: css("--axis"), zerolinecolor: css("--axis") }, extra);
+const draw = (id, traces, lay) => Plotly.react(id, traces, layout(lay), { displayModeBar: false, responsive: true });
+const tile = (label, value, detail) => `<div class="tile"><div class="label">${label}</div><div class="value">${value}</div><div class="detail">${detail || ""}</div></div>`;
+
+// ---------- Headline tiles ----------
+function tiles() {
+  const now = D.chain.by_year[Y], before = D.chain.by_year[Y - 1], m = D.membership;
+  $("tiles").innerHTML =
+    tile(`Revenue, ${Y}`, money(now.revenue), `${signed(now.revenue - before.revenue)} on ${Y - 1}`) +
+    tile("Site profit", money(now.site_profit), `${pct(now.site_profit / now.revenue)} of revenue`) +
+    tile("After head office", money(now.profit_after_head_office), `${pct(now.profit_after_head_office / now.revenue)} of revenue`) +
+    tile("Against budget", signed(D.variance.actual_profit - D.variance.budget_profit), `site profit, budget ${money(D.variance.budget_profit)}`) +
+    tile("Members", whole(m.members), `${(m.members - m.members_a_year_ago >= 0 ? "+" : "") + whole(m.members - m.members_a_year_ago)} in the year`);
+}
+
+// ---------- 1. Scorecard ----------
+let picked = D.scorecard.find(r => r.flags && !r.flags.includes("filling")).site_id;
+let sortKey = "margin", sortDown = true;
+const colourOf = r => r.flags.includes("filling") ? css("--grey") : r.flags ? css("--orange") : css("--blue");
+
+function marginChart() {
+  const rows = D.scorecard.slice().sort((a, b) => a.margin - b.margin);
+  draw("marginChart", [{
+    type: "bar", orientation: "h", y: rows.map(r => r.name), x: rows.map(r => r.margin * 100), customdata: rows.map(r => r.site_id),
+    marker: { color: rows.map(colourOf), line: { color: rows.map(r => r.site_id === picked ? css("--ink") : "rgba(0,0,0,0)"), width: 1.5 } },
+    text: rows.map(r => r.flags), textposition: "outside", cliponaxis: false, textfont: { size: 11.5, color: css("--soft") },
+    hovertemplate: "<b>%{y}</b><br>Margin %{x:.1f}%<extra></extra>",
+  }], { margin: { l: 58, r: 16, t: 4, b: 40 }, bargap: 0.3,
+        xaxis: axis({ title: { text: "Profit margin (%)" }, range: [-6, 82], tickvals: [0, 10, 20, 30, 40, 50] }), yaxis: axis({ showgrid: false }) });
+  $("marginChart").removeAllListeners && $("marginChart").removeAllListeners("plotly_click");
+  $("marginChart").on("plotly_click", e => pick(e.points[0].customdata));
+}
+
+const columns = [
+  ["name", "Site", r => r.name], ["revenue", "Revenue", r => money(r.revenue)], ["margin", "Margin", r => pct(r.margin)],
+  ["labour_share", "Labour", r => pct(r.labour_share)], ["chemicals_recent", "Chem. per car", r => "$" + r.chemicals_recent.toFixed(2)],
+  ["churn", "Cancel rate", r => pct(r.churn, 1)], ["fix_worth_per_year", "Fix is worth", r => r.fix_worth_per_year ? money(r.fix_worth_per_year) + " a year" : ""],
+  ["flags", "What stands out", r => r.flags.split("; ").filter(Boolean).map(f => `<span class="pill ${f.includes("filling") ? "wait" : "warn"}">${f}</span>`).join("")],
+];
+function scoreTable() {
+  const rows = D.scorecard.slice().sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : a[sortKey] < b[sortKey] ? -1 : 0) * (sortDown ? -1 : 1));
+  $("scoreTable").innerHTML = "<thead><tr>" + columns.map(c => `<th data-key="${c[0]}" class="${c[0] === "flags" ? "flag" : ""}" aria-sort="${c[0] === sortKey ? (sortDown ? "descending" : "ascending") : "none"}">${c[1]}${c[0] === sortKey ? (sortDown ? " ▼" : " ▲") : ""}</th>`).join("") + "</tr></thead><tbody>" +
+    rows.map(r => `<tr data-id="${r.site_id}" tabindex="0" class="${r.site_id === picked ? "picked" : ""}">` + columns.map(c => `<td class="${c[0] === "flags" ? "flag" : ""}">${c[2](r)}</td>`).join("") + "</tr>").join("") + "</tbody>";
+}
+$("scoreTable").addEventListener("click", e => {
+  const th = e.target.closest("th"), tr = e.target.closest("tbody tr");
+  if (th) { sortDown = th.dataset.key === sortKey ? !sortDown : true; sortKey = th.dataset.key; scoreTable(); }
+  else if (tr) pick(+tr.dataset.id);
+});
+$("scoreTable").addEventListener("keydown", e => { const tr = e.target.closest("tbody tr"); if (tr && e.key === "Enter") pick(+tr.dataset.id); });
+
+const metricNames = { profit: "Profit", revenue: "Revenue", members: "Members", labour_share: "Labour share", chemicals_per_car: "Chemicals per car", churn: "Cancel rate" };
+function pick(id, keepMetric) {
+  picked = id;
+  const r = sites[id];
+  if (!keepMetric) $("metric").value = r.flags.includes("Chemical") ? "chemicals_per_car" : r.flags.includes("Labour") ? "labour_share" : r.flags.includes("leaving") ? "churn" : r.flags.includes("filling") ? "members" : "profit";
+  marginChart(); scoreTable(); siteChart();
+}
+function siteChart() {
+  const r = sites[picked], s = D.site_monthly[picked], key = $("metric").value;
+  const isShare = key === "labour_share" || key === "churn", isMoney = key === "profit" || key === "revenue";
+  const scale = isShare ? 100 : 1;
+  const traces = [{ x: s.months, y: s[key].map(v => v * scale), mode: "lines", line: { color: css("--blue"), width: 2 }, name: r.name,
+    hovertemplate: "%{x|%b %Y}<br><b>" + (isShare ? "%{y:.1f}%" : isMoney ? "$%{y:,.0f}" : key === "members" ? "%{y:,.0f}" : "$%{y:.2f}") + "</b><extra>" + r.name + "</extra>" }];
+  let note = `${r.name}: ${r.region} region, opened ${r.opened}, ${whole(r.traffic)} cars pass each day, ${r.competitors} competitor${r.competitors === 1 ? "" : "s"} nearby.`;
+  if (key === "labour_share") {
+    traces.push({ x: D.chain.months, y: D.chain.labour_share.map(v => v * 100), mode: "lines", line: { color: css("--muted"), width: 1.5, dash: "dot" }, name: "Whole chain", hovertemplate: "%{x|%b %Y}<br>%{y:.1f}%<extra>Whole chain</extra>" });
+    note += " Dotted line: the whole chain.";
+  }
+  if (r.flags) note += ` <b>${r.flags}.</b>`;
+  $("siteTitle").textContent = `${r.name}: ${metricNames[key].toLowerCase()}`;
+  $("siteNote").innerHTML = note;
+  draw("siteChart", traces, { hovermode: "x unified", xaxis: axis({ type: "date", tickformat: "%b %Y" }),
+    yaxis: axis({ rangemode: key === "profit" ? "normal" : "tozero", ticksuffix: isShare ? "%" : "", tickprefix: isMoney || key === "chemicals_per_car" ? "$" : "", tickformat: isMoney ? "~s" : "" }) });
+}
+$("metric").addEventListener("change", () => siteChart());
+
+// ---------- 2. Budget bridge ----------
+function bridge() {
+  const id = $("bridgeSite").value, v = id === "all" ? D.variance : D.variance_by_site[id];
+  const steps = Object.entries(v.effects).sort((a, b) => a[1] - b[1]);
+  const labels = ["Budget", ...steps.map(s => s[0]), "Actual"];
+  const gap = v.actual_profit - v.budget_profit;
+  draw("bridge", [{
+    type: "waterfall", x: labels, measure: ["absolute", ...steps.map(() => "relative"), "total"], y: [v.budget_profit, ...steps.map(s => s[1]), v.actual_profit],
+    text: [money(v.budget_profit), ...steps.map(s => signed(s[1])), money(v.actual_profit)], textposition: "outside", cliponaxis: false, textfont: { color: css("--ink"), size: 11.5 },
+    increasing: { marker: { color: css("--good") } }, decreasing: { marker: { color: css("--bad") } }, totals: { marker: { color: css("--blue") } },
+    connector: { line: { color: css("--axis"), width: 1 } }, hovertemplate: "<b>%{x}</b><br>%{text}<extra></extra>",
+  }], { margin: { l: 60, r: 16, t: 22, b: 86 }, xaxis: axis({ tickangle: -35, showgrid: false }),
+        yaxis: axis({ tickprefix: "$", tickformat: "~s", range: bridgeRange(v, steps) }) });
+  const worst = steps[0], best = steps[steps.length - 1];
+  $("bridgeNote").innerHTML = `${id === "all" ? "Whole chain" : sites[id].name}: profit of ${money(v.actual_profit)} against a budget of ${money(v.budget_profit)}, <b class="${gap >= 0 ? "pos" : "neg"}">${signed(gap)}</b>. ` +
+    `Biggest drag: ${worst[0].toLowerCase()} (${signed(worst[1])}). Biggest help: ${best[0].toLowerCase()} (${signed(best[1])}). The axis does not start at zero, so the steps are visible.`;
+}
+function bridgeRange(v, steps) {
+  let level = v.budget_profit, lo = Math.min(v.budget_profit, v.actual_profit), hi = Math.max(v.budget_profit, v.actual_profit);
+  for (const s of steps) { level += s[1]; lo = Math.min(lo, level); hi = Math.max(hi, level); }
+  const pad = (hi - lo) * 0.35 || 1;
+  return [lo - pad, hi + pad * 0.6];
+}
+
+// ---------- 3. Membership ----------
+function members() {
+  const m = D.membership;
+  $("memberTiles").innerHTML =
+    tile("Recurring revenue", money(m.monthly_recurring_revenue), `a month, ${pct(m.membership_share_of_revenue)} of all revenue`) +
+    tile("Average fee", "$" + m.fee.toFixed(2), `a month, ${m.visits_per_member.toFixed(1)} washes each`) +
+    tile("Cancel each month", pct(m.churn, 1), `churn; ${pct(m.retention[12])} of joiners last a year`) +
+    tile("Worth of a new member", money(m.ltv), `lifetime value (LTV), about ${m.lifetime_months.toFixed(0)} months`) +
+    tile("Cost to win one", money(m.cac), `marketing per joiner (CAC)`) +
+    tile("Worth against cost", m.ltv_to_cac.toFixed(0) + " to 1", `paid back in ${m.payback_months.toFixed(1)} months`);
+  const months = Object.keys(m.members_by_month);
+  draw("memberChart", [{ x: months, y: Object.values(m.members_by_month), mode: "lines", line: { color: css("--blue"), width: 2 }, hovertemplate: "%{x|%b %Y}<br><b>%{y:,.0f}</b> members<extra></extra>" }],
+    { xaxis: axis({ type: "date", tickformat: "%b %Y" }), yaxis: axis({ tickformat: "~s" }),
+      shapes: [{ type: "line", x0: "2025-03", x1: "2025-03", yref: "paper", y0: 0, y1: 1, line: { color: css("--muted"), width: 1, dash: "dot" } }],
+      annotations: [{ x: "2025-03", yref: "paper", y: 0.06, text: "Price rise, March 2025", showarrow: false, xanchor: "right", xshift: -6, font: { color: css("--soft"), size: 12 } }] });
+  const ages = Object.keys(m.retention).map(Number), marks = [1, 6, 12, 24];
+  draw("retention", [
+    { x: ages, y: ages.map(a => m.retention[a] * 100), mode: "lines", line: { color: css("--blue"), width: 2 }, hovertemplate: "After %{x} months<br><b>%{y:.0f}%</b> still members<extra></extra>" },
+    { x: marks, y: marks.map(a => m.retention[a] * 100), mode: "markers+text", marker: { color: css("--blue"), size: 9, line: { color: css("--card"), width: 2 } },
+      text: marks.map(a => pct(m.retention[a])), textposition: "top right", textfont: { color: css("--ink") }, hoverinfo: "skip" },
+  ], { xaxis: axis({ title: { text: "Months since joining" } }), yaxis: axis({ range: [0, 105], ticksuffix: "%" }) });
+}
+
+// ---------- 4. Forecast ----------
+function forecast() {
+  const f = D.forecast, b = f.backtest, total = f.revenue.reduce((a, v) => a + v, 0), now = D.chain.by_year[Y].revenue;
+  $("forecastLead").innerHTML = `2026 revenue is forecast at <b>${money(total)}</b> (${(total / now - 1 >= 0 ? "+" : "") + pct(total / now - 1, 1)} on ${Y}). ` +
+    `Checked on a year it had not seen: forecasting ${Y} from earlier years only, monthly car counts for the ${b.sites_tested} established sites were off by ${pct(b.monthly_miss_model, 1)} on average. ` +
+    `The simple rule "same as this month last year" was off by ${pct(b.monthly_miss_same_month_last_year, 1)}.`;
+  const last = D.chain.months.length - 1;
+  draw("forecastChart", [
+    { x: D.chain.months, y: D.chain.revenue, mode: "lines", line: { color: css("--blue"), width: 2 }, name: "Actual", hovertemplate: "%{x|%b %Y}<br><b>$%{y:,.0f}</b><extra>Actual</extra>" },
+    { x: [D.chain.months[last], ...f.months], y: [D.chain.revenue[last], ...f.revenue], mode: "lines", line: { color: css("--blue"), width: 2, dash: "dash" }, name: "Forecast", hovertemplate: "%{x|%b %Y}<br><b>$%{y:,.0f}</b><extra>Forecast</extra>" },
+  ], { xaxis: axis({ type: "date", tickformat: "%b %Y" }), yaxis: axis({ tickprefix: "$", tickformat: "~s" }),
+       annotations: [{ x: f.months[6], y: f.revenue[6], text: "Forecast (dashed)", showarrow: false, yshift: 18, font: { color: css("--soft") } },
+                     { x: D.chain.months[18], y: D.chain.revenue[18], text: "Actual", showarrow: false, yshift: 18, font: { color: css("--soft") } }] });
+}
+
+// ---------- 5. Site 24 ----------
+const A0 = D.site24.assumptions;
+function resetSliders() { $("sRate").value = A0.discount_rate * 100; $("sExit").value = A0.exit_multiple; $("sVol").value = 0; $("sCost").value = 0; }
+function site24Section() {
+  const a = Object.assign({}, A0, { discount_rate: +$("sRate").value / 100, exit_multiple: +$("sExit").value });
+  const vol = 1 + +$("sVol").value / 100, cost = 1 + +$("sCost").value / 100, econ = D.site24.economics;
+  $("vRate").textContent = (+$("sRate").value).toFixed(1) + "% a year"; $("vExit").textContent = (+$("sExit").value).toFixed(1) + " times";
+  $("vVol").textContent = (+$("sVol").value >= 0 ? "+" : "") + $("sVol").value + "%"; $("vCost").textContent = (+$("sCost").value >= 0 ? "+" : "") + $("sCost").value + "%";
+  const rows = D.site24.candidates.map(c => {
+    const run = cars => site24(cars * vol, c.rent, c.build_cost * cost, econ, a);
+    return { c, mid: run(c.cars_expected), low: run(c.cars_expected - 1.3 * c.cars_typical_miss), high: run(c.cars_expected + 1.3 * c.cars_typical_miss) };
+  });
+  const cls = v => v >= 0 ? "pos" : "neg";
+  $("candTable").innerHTML = "<thead><tr><th>Location</th><th>Cars passing a day</th><th>Competitors</th><th>Build cost</th><th>Washes a year</th><th>Profit a year, once full</th><th>NPV</th><th>NPV if volume is low</th><th>Yearly return (IRR)</th><th>Payback</th></tr></thead><tbody>" +
+    rows.map(r => `<tr style="cursor:default"><td>${r.c.candidate}</td><td>${whole(r.c.traffic)}</td><td>${r.c.competitors}</td><td>${money(r.c.build_cost * cost)}</td><td>${whole(r.c.cars_expected * vol)}</td><td>${money(r.mid.matureProfit)}</td>` +
+      `<td class="${cls(r.mid.npv)}"><b>${signed(r.mid.npv)}</b></td><td class="${cls(r.low.npv)}">${signed(r.low.npv)}</td><td>${isNaN(r.mid.irr) ? "none" : pct(r.mid.irr, 1)}</td><td>${r.mid.paybackYears ? r.mid.paybackYears.toFixed(1) + " years" : "over 10 years"}</td></tr>`).join("") + "</tbody>";
+  const best = rows.slice().sort((x, y) => y.mid.npv - x.mid.npv)[0];
+  $("verdict").innerHTML = best.mid.npv <= 0
+    ? `<b>With these settings, none of the three locations clears the required return.</b> The least bad is ${best.c.candidate} at ${signed(best.mid.npv)}.`
+    : `<b>Best with these settings: ${best.c.candidate}.</b> It creates ${money(best.mid.npv)} of value, earns ${pct(best.mid.irr, 1)} a year against a required ${(+$("sRate").value).toFixed(1)}%, and ` +
+      (best.low.npv >= 0 ? `still clears the bar if volume comes in low (${signed(best.low.npv)}).` : `falls short if volume comes in low (${signed(best.low.npv)}).`) +
+      ` It needs ${whole(breakeven(best.c, cost, econ, a))} washes a year to break even; the prediction is ${whole(best.c.cars_expected * vol)}.`;
+  const names = rows.map(r => r.c.candidate);
+  draw("npvChart", [
+    { x: rows.flatMap(r => [r.low.npv, r.high.npv, null]), y: rows.flatMap(r => [r.c.candidate, r.c.candidate, null]), mode: "lines", line: { color: css("--grey"), width: 8 }, hoverinfo: "skip" },
+    { x: rows.map(r => r.mid.npv), y: names, mode: "markers+text", marker: { size: 16, color: rows.map(r => r.mid.npv >= 0 ? css("--blue") : css("--bad")), line: { color: css("--card"), width: 2 } },
+      text: rows.map(r => signed(r.mid.npv)), textposition: "top center", textfont: { color: css("--ink") },
+      customdata: rows.map(r => [signed(r.low.npv), signed(r.high.npv)]), hovertemplate: "<b>%{y}</b><br>NPV %{text}<br>Low %{customdata[0]}, high %{customdata[1]}<extra></extra>" },
+  ], { margin: { l: 130, r: 24, t: 14, b: 40 }, xaxis: axis({ tickprefix: "$", tickformat: "~s", zerolinecolor: css("--ink"), zerolinewidth: 1.5 }),
+       yaxis: axis({ autorange: "reversed", showgrid: false, range: [-0.6, 2.6] }) });
+}
+function breakeven(c, cost, econ, a) {
+  let low = 0, high = 400000;
+  for (let i = 0; i < 60; i++) { const mid = (low + high) / 2; if (site24(mid, c.rent, c.build_cost * cost, econ, a).npv < 0) low = mid; else high = mid; }
+  return high;
+}
+["sRate", "sExit", "sVol", "sCost"].forEach(id => $(id).addEventListener("input", site24Section));
+$("reset").addEventListener("click", () => { resetSliders(); site24Section(); });
+
+// ---------- Start ----------
+$("bridgeSite").innerHTML = `<option value="all">Whole chain</option>` + D.scorecard.slice().sort((a, b) => a.site_id - b.site_id).map(r => `<option value="${r.site_id}">${r.name}</option>`).join("");
+$("bridgeSite").addEventListener("change", bridge);
+function everything() { tiles(); pick(picked, true); bridge(); members(); forecast(); site24Section(); }
+resetSliders();
+if (window.Plotly) { $("metric").value = "labour_share"; everything(); pick(picked); }
+else document.querySelector(".madeup").insertAdjacentHTML("afterend", '<p role="alert" class="neg">The chart library did not load. Check your internet connection and reload.</p>');
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", everything);
+</script>
+</body>
+</html>

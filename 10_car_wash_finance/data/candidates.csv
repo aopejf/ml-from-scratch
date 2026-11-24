@@ -1,0 +1,4 @@
+candidate,region,traffic,competitors,income,rent,build_cost
+A: Retail park,Central,41000,3,84000,27500,4600000
+B: Commuter road,North,34000,1,91000,22000,4100000
+C: Edge of town,South,24000,0,66000,17000,3500000

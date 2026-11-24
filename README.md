@@ -3,10 +3,10 @@
 [![tests](https://github.com/aopejf/ml-from-scratch/actions/workflows/tests.yml/badge.svg)](https://github.com/aopejf/ml-from-scratch/actions/workflows/tests.yml)
 
 Ten projects that build machine learning up from a single neuron to a language model you can type into,
-with the core parts written by hand instead of called from a library. Every result below is measured, and
+with the core parts written by hand instead of called from a library, plus one applied finance project. Every result below is measured, and
 every project says what it cannot do.
 
-## Start with these three
+## Start with these four
 
 ### 1. A GPT that writes stories, built end to end ([`5_story_gpt`](5_story_gpt))
 
@@ -41,7 +41,19 @@ The simple model (logistic regression) tied the complex one, so the write-up rec
 A diffusion model, the same kind of model behind image generators. 100 of 100 requested digits came out
 readable as the digit asked for, and a check confirms none were copied from the training set.
 
-## All ten
+### 4. Finance pack for a 23-site car wash chain ([`10_car_wash_finance`](10_car_wash_finance))
+
+![Scorecard, profit bridge, retention curve and the site 24 comparison](10_car_wash_finance/result.png)
+
+The work of a financial analyst on a made-up multi-site business: a profit scorecard for every site, the budget miss
+explained to the dollar, what a member is worth, a tested forecast, and a build-or-not decision on the next site.
+
+**[Open the dashboard](https://aopejf.github.io/ml-from-scratch/finance/)** | [one-page memo](10_car_wash_finance/MEMO.md) | [Excel model](10_car_wash_finance/car_wash_finance_model.xlsx)
+
+- Found all four problems planted in the data, with a dollar value on the fixable ones, and no false alarms.
+- The same model exists in Python, Excel and JavaScript, and the three are checked against each other.
+
+## All eleven
 
 | # | Folder | Official name | What it does | Result |
 |---|--------|---------------|--------------|--------|
@@ -55,8 +67,9 @@ readable as the digit asked for, and a check confirms none were copied from the 
 | 7 | [`7_wave_equation`](7_wave_equation) | Damped wave equation, finite differences | Simulates a vibrating drum skin and animates it in 3D | Energy conserved to 1e-15; rings within 0.5% of the textbook frequencies |
 | 8 | [`8_portfolio_dashboard`](8_portfolio_dashboard) | Portfolio risk analytics | An interactive dashboard of returns, volatility, drawdowns and correlations for any stocks | An equal mix of six holdings had 15.5% volatility against a 23.9% average |
 | 9 | [`9_neural_net_numpy`](9_neural_net_numpy) | Multilayer perceptron, loss landscape (PCA) | A neural net in pure NumPy, with a map of the path training took | 100% on new points; hand-written gradients correct to 1e-10 |
+| 10 | [`10_car_wash_finance`](10_car_wash_finance) | Unit economics, variance analysis, NPV and IRR | A finance pack for a made-up 23-site chain: scorecard, budget bridge, forecast, investment decision | Finds every planted problem; Excel, Python and JavaScript agree |
 
-Projects 0 to 6 are in order because each one uses the ideas from the ones before. Projects 7 to 9 stand alone.
+Projects 0 to 6 are in order because each one uses the ideas from the ones before. Projects 7 to 10 stand alone.
 
 ## The one idea behind all of them
 
@@ -81,7 +94,7 @@ Every model here learns the same way:
 Python 3.12 with:
 
 ```powershell
-python -m pip install numpy matplotlib scikit-learn pandas yfinance
+python -m pip install numpy matplotlib scikit-learn pandas yfinance xlsxwriter
 ```
 
 ```powershell
@@ -97,7 +110,7 @@ Everything here was trained on a laptop processor, with no graphics card.
 python -m pytest
 ```
 
-14 automatic checks in [`tests`](tests), plus one that compares the JavaScript model with the Python one, run on every change (the badge at the top). They test claims the projects
+24 automatic checks in [`tests`](tests), plus two that compare JavaScript code with its Python original, run on every change (the badge at the top). They test claims the projects
 depend on: that backpropagation gives the right gradients, that the GPT cannot see words ahead of the one it is
-predicting, that the tokenizer gives back exactly the text that went in, and that the portfolio numbers are right
-on prices with known answers.
+predicting, that the tokenizer gives back exactly the text that went in, that the portfolio numbers are right
+on prices with known answers, and that the finance pack's budget bridge adds up to the cent.
