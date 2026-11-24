@@ -5,7 +5,51 @@ new handwritten digits out of random static.
 
 ![64 digits appearing out of static](generating.gif)
 
-## Result
+There are two versions here. The small one came first; the upgrade lets you choose the digit.
+
+## The upgrade: ask for a digit, get that digit
+
+![100 digits appearing out of static, ten of each](generating_mnist.gif)
+
+![Real MNIST digits next to digits generated on request](result_mnist.png)
+
+Every column in the middle grid was requested: the first column asked for 0s, the second for 1s, and so on.
+All 100 came out as the digit that was asked for, in different handwriting each time.
+
+What changed from the small version:
+
+| | Small version | Upgrade |
+|---|---|---|
+| Images | 8x8 pixels, 1,597 of them | 28x28 pixels, 59,000 of them (MNIST) |
+| Choose the digit? | No | Yes: the network is told the digit (class conditioning) |
+| Sharper results | | Classifier-free guidance: it guesses with and without the label, then pushes towards the label |
+| Smoother results | | Generates from a running average of the weights (EMA) |
+| Network | one-level U-Net, 844,289 parameters | two-level U-Net, 586,945 parameters |
+
+Copying check, as before: the typical generated digit is 9.18 away from its closest training digit; real digits the
+model never saw are 8.60 away. So it is drawing new digits, not replaying stored ones.
+
+![The same ten requests at four points in training](progress_mnist.png)
+
+Training was 4,000 steps, 86 minutes on a laptop processor. Files: `conditional.py` (the network and guided sampling)
+and `train_mnist.py`. To run it, download MNIST into `data/` first:
+
+```powershell
+curl.exe -L --create-dirs -o data/train-images-idx3-ubyte.gz https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz
+```
+
+```powershell
+curl.exe -L -o data/train-labels-idx1-ubyte.gz https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz
+```
+
+```powershell
+python train_mnist.py
+```
+
+Limits of the upgrade: a few digits are malformed (some 2s and 6s in the grid), it only knows ten labels where
+text-to-image models take a sentence, and "all 100 are the right digit" is my own reading of the grid, not a measured score.
+
+## The small version: result
 
 ![Real digits, generated digits, the copying check and the loss](result.png)
 
