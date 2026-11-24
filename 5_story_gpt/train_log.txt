@@ -1,0 +1,19 @@
+Stories: 105,688,049 word pieces to train on, 5,667,438 held back
+Model: 3,379,072 adjustable numbers
+Time limit: 6.5 hours in total
+
+
+=== step 0   0 min of 390   loss on training stories 8.498   on unseen stories 8.494 ===
+Once upon a time, there was a little dinosaur whoular carefully normalister feathers rise deathipfortable jew mist moved can birds pillow Blue matchither trust splas what wallsday once∩┐╜ liz com∩┐╜ix farmer ever Danfic bookcleHow hugs dripp washed wat," cardboard dragonro hospitalQ shiver thoughtful Dan reliableled fillob ntiny Everyone spotted back kn gather Tinaased workular stones Bird gather th∩┐╜ drum sack E gar cont Rose happen pointedle chain Justun cont mommy∩┐╜ muffin spaghettiishother longoose competitive muffin tells shut ambulance hel
+
+step     10     1 min  loss 8.459  | patient cop mic∩┐╜ shr sour available tank∩┐╜ o only kn ignor wrong Anna aut nice wallet pige thick I hands outside messyr
+step     20     1 min  loss 8.286  |. clean spo curi firework onto leave noisy Daisy and support complet basket. butter. .it5 salt di fishDon Sus
+step     30     2 min  loss 7.882  | a quietFinally a..∩┐╜ wanted a and used and.ountain smiling.   and avocult. flea. care curi
+step     40     2 min  loss 7.268  |..... a. Tim, the..... day. and...!". not.
+step     50     2 min  loss 6.734  |. the. a. and mom... ,. Tim and., and.., and to and the
+step     60     3 min  loss 6.304  |..s not..! and wanted and he., for ,..".. had, on the the
+step     70     3 min  loss 5.970  |.  there there to the to to. , for mom a said to on that.  the the. They you
+step     80     3 min  loss 5.788  |.  to the her the the was you but the theOnce not the, time and the was the, and to.
+step     90     4 min  loss 5.610  | with a big. The a little ands and. Once a big. But.  to, a big, and
+step    100     4 min  loss 5.412  |, ", Lily. They to was a. They to play with a big on the boy. 
+step    110     4 min  loss 5.234  | was a little and. They all and you was a to find. They, the go. They were big, "I

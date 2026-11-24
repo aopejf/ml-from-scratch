@@ -1,0 +1,21 @@
+Digits: 1597 to train on, 200 held back, each 8x8 pixels
+Model: 844,289 adjustable numbers
+
+step     1   loss 1.0013   (0s)
+step   500   loss 0.0992   (208s)
+step  1000   loss 0.0856   (415s)
+step  1500   loss 0.0830   (624s)
+step  2000   loss 0.0798   (838s)
+step  2500   loss 0.0787   (1048s)
+step  3000   loss 0.0775   (1259s)
+step  3500   loss 0.0770   (1471s)
+step  4000   loss 0.0726   (1682s)
+Training took 28.0 minutes
+
+Generating 64 images (1,000 denoising steps each)...
+
+Copying check: distance from each image to its closest training image
+  generated digits:        typical 2.08   smallest 1.52
+  real held-back digits:   typical 2.00   smallest 0.94
+
+Saved: result.png, process.png, generating.gif, model.pt

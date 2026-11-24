@@ -1,0 +1,11 @@
+# Large downloaded data and training leftovers (each README says how to get the data)
+5_story_gpt/data/
+5_story_gpt/checkpoint.pt
+5_story_gpt/checkpoint.tmp
+4_diffusion/data/
+4_diffusion/preview.png
+*.tmp
+__pycache__/
+*.pyc
+train_log*.txt
+prepare_log.txt
