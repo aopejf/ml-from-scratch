@@ -1,7 +1,8 @@
 # Machine learning, built from scratch
 
-Seven projects, from a single neuron to a language model you can type into. Each is one folder with its own
-code, pictures and README. They are in this order because each one uses the ideas from the ones before.
+Ten projects, from a single neuron to a language model you can type into. Each is one folder with its own
+code, pictures and README. Projects 0 to 6 are in order because each one uses the ideas from the ones before.
+Projects 7 to 9 stand alone.
 
 | # | Folder | Official name | What it does | Result |
 |---|--------|---------------|--------------|--------|
@@ -12,6 +13,9 @@ code, pictures and README. They are in this order because each one uses the idea
 | 4 | `4_diffusion` | Denoising diffusion model (DDPM), class-conditional | Generates handwritten digits out of random static, and you choose the digit | 100 of 100 requested digits readable as the digit asked for, none copied |
 | 5 | `5_story_gpt` | GPT with a byte-pair-encoding tokenizer | Writes children's stories; includes a page you can type into | Loss 8.52 to 1.95 on unseen stories after one night on a laptop |
 | 6 | `6_membership_churn` | Churn prediction (gradient boosting) | Picks which members to contact before they cancel | Reaches 3.8 times as many cancellers as picking at random (made-up data) |
+| 7 | `7_wave_equation` | Damped wave equation, finite differences | Simulates a vibrating drum skin and animates it in 3D | Energy conserved to 1e-15; rings within 0.5% of the textbook frequencies |
+| 8 | `8_portfolio_dashboard` | Portfolio risk analytics | One dashboard of returns, volatility, drawdowns and correlations from real prices | An equal mix of six holdings had 15.5% volatility against a 23.9% average |
+| 9 | `9_neural_net_numpy` | Multilayer perceptron, loss landscape (PCA) | A neural net in pure NumPy, with a map of the path training took | 100% on new points; hand-written gradients correct to 1e-10 |
 
 ![Digits generated on request](4_diffusion/generating_mnist.gif)
 
@@ -38,7 +42,7 @@ Every model here learns the same way:
 Python 3.12 with:
 
 ```powershell
-python -m pip install numpy matplotlib scikit-learn pandas
+python -m pip install numpy matplotlib scikit-learn pandas yfinance
 ```
 
 ```powershell

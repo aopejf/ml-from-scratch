@@ -9,3 +9,4 @@ __pycache__/
 *.pyc
 train_log*.txt
 prepare_log.txt
+8_portfolio_dashboard/data/
