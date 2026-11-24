@@ -84,17 +84,27 @@ Or in the terminal:
 python generate.py "Lily found a shiny key in the garden."
 ```
 
-## Put it online
+## In your browser
 
-`make_space.py` gathers the model, the code and two setup files into `space_upload/`, ready for
-[Hugging Face Spaces](https://huggingface.co/spaces), a free host for machine learning demos.
+**[Try it here](https://aopejf.github.io/ml-from-scratch/)**: nothing to install, and nothing you type leaves your computer.
+
+There is no server behind that page. The model's arithmetic is written a second time, in plain JavaScript with
+no libraries (`docs/story-model.js`): the tokenizer, attention, and sampling. `export_web.py` packs the trained
+numbers into a 7 MB file the page downloads.
+
+The JavaScript version is checked against the Python one on every change: same word pieces, and next-piece odds
+that agree to within 0.002 of a percentage point.
 
 ```powershell
-python make_space.py
+python export_web.py
 ```
 
-Then on huggingface.co: **New Space**, choose **Docker** and the **Blank** template, create it, open
-**Files > Add file > Upload files**, and drag in everything inside `space_upload/`. The page builds itself in a few minutes.
+```powershell
+node ../tests/check_web_model.js
+```
+
+One difference: when a story passes the model's 128-piece memory, the page keeps the most recent 64 pieces and
+carries on, where the Python version re-reads the last 128 for every new piece. That keeps it fast in a browser.
 
 ## A bigger model on a free graphics card
 
@@ -133,7 +143,7 @@ python train.py 6.5
 - `train.py`: time-limited training with checkpoints.
 - `generate.py`, `demo.py`, `demo.html`: ways to use the trained model.
 - `evaluate.py`, `evaluation.md`: the scored test and its results.
-- `make_space.py`: gathers the files for putting the page online.
+- `export_web.py`, `../docs/`: the version that runs in a browser with no server.
 - `train_colab.ipynb` (written by `make_notebook.py`): trains the bigger model on a free graphics card.
 - `model.pt`, `tokenizer.json`: the trained model and its tokenizer.
 - `samples.md`: the same prompt at different points in training.

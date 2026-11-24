@@ -13,12 +13,14 @@ every project says what it cannot do.
 The tokenizer, the attention, the training loop and the web page are all written from scratch. It trained in one
 night on a laptop processor, with no graphics card.
 
+**[Try it in your browser](https://aopejf.github.io/ml-from-scratch/)**
+
 > **Once upon a time, there was a little dinosaur who** lived in a small town. The dinosaur liked to go
 > on adventures and play in the park. [...] They all played together and had fun.
 
 - Loss fell from 8.52 to 1.95 on stories it never saw.
 - Scored against real stories on 200 unseen openings: [`evaluation.md`](5_story_gpt/evaluation.md).
-- Runs as a web page (`python demo.py`) that shows the odds it gave each possible next word.
+- The model is also written in plain JavaScript, so the demo runs in your browser with no server, and shows the odds it gave each possible next word.
 
 ### 2. Which customers are about to leave? ([`6_membership_churn`](6_membership_churn))
 
@@ -95,7 +97,7 @@ Everything here was trained on a laptop processor, with no graphics card.
 python -m pytest
 ```
 
-14 automatic checks in [`tests`](tests), run on every change (the badge at the top). They test claims the projects
+14 automatic checks in [`tests`](tests), plus one that compares the JavaScript model with the Python one, run on every change (the badge at the top). They test claims the projects
 depend on: that backpropagation gives the right gradients, that the GPT cannot see words ahead of the one it is
 predicting, that the tokenizer gives back exactly the text that went in, and that the portfolio numbers are right
 on prices with known answers.

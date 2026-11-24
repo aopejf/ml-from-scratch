@@ -12,7 +12,6 @@ prepare_log.txt
 8_portfolio_dashboard/data/
 6_membership_churn/data/
 5_story_gpt/evaluate_log.txt
-5_story_gpt/space_upload/
 .pytest_cache/
 5_story_gpt/checkpoint_big.*
 5_story_gpt/model_big.pt

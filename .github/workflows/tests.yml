@@ -24,3 +24,5 @@ jobs:
           python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
       - name: Run the tests
         run: python -m pytest -q
+      - name: Check the JavaScript model against the Python one
+        run: node tests/check_web_model.js
