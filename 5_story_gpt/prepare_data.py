@@ -2,12 +2,14 @@
 Step 1 of the story GPT: learn the word pieces, then turn the stories into numbers.
 
     python prepare_data.py
+    python prepare_data.py --keep-tokenizer   reuse the word pieces already in tokenizer.json
 
 Reads   data/train_part.txt, data/valid.txt   (TinyStories)
 Writes  tokenizer.json                        the learned word pieces
         data/train.bin, data/valid.bin        the stories as piece numbers
 """
 
+import sys
 import time
 from array import array
 from pathlib import Path
@@ -27,10 +29,14 @@ text = text[: text.rindex(END)]  # the download stops mid-story; drop the unfini
 valid_text = (here / "data" / "valid.txt").read_bytes().decode("utf-8", "replace")
 print(f"  {len(text) / 1e6:.0f} million characters to train on, {len(valid_text) / 1e6:.0f} million held back")
 
-print(f"\nLearning {VOCAB_SIZE:,} word pieces...")
-tokenizer = Tokenizer.train(text[: LEARN_FROM_MB * 1_000_000], VOCAB_SIZE)
-tokenizer.save(here / "tokenizer.json")
-print(f"  done, {tokenizer.vocab_size:,} pieces   ({time.time() - start:.0f}s)")
+if "--keep-tokenizer" in sys.argv:
+    tokenizer = Tokenizer.load(here / "tokenizer.json")
+    print(f"\nUsing the {tokenizer.vocab_size:,} word pieces already learned")
+else:
+    print(f"\nLearning {VOCAB_SIZE:,} word pieces...")
+    tokenizer = Tokenizer.train(text[: LEARN_FROM_MB * 1_000_000], VOCAB_SIZE)
+    tokenizer.save(here / "tokenizer.json")
+    print(f"  done, {tokenizer.vocab_size:,} pieces   ({time.time() - start:.0f}s)")
 
 example = "Once upon a time, there was a little dinosaur who loved pancakes."
 pieces = [tokenizer.piece(t) for t in tokenizer.encode(example)]

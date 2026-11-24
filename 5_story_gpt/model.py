@@ -20,6 +20,9 @@ here = Path(__file__).parent
 # Sized so that one night on a laptop processor is enough to train it.
 CONFIG = dict(context=128, width=192, n_heads=6, n_layers=4, dropout=0.0)
 
+# A larger version for a graphics card: twice as wide, half as deep again, and it sees twice as far back.
+BIG_CONFIG = dict(context=256, width=384, n_heads=6, n_layers=6, dropout=0.0)
+
 
 def new_model(vocab_size, config=CONFIG):
     return MiniGPT(vocab_size, **config)
@@ -33,10 +36,11 @@ def write(model, tokenizer, prompt, max_pieces=200, temperature=0.8, top_k=40, o
     occasional wild guess from derailing the story.
     """
     model.eval()
+    device = next(model.parameters()).device
     tokens = tokenizer.encode(prompt) or [tokenizer.end_token]
     start = len(tokens)
     for _ in range(max_pieces):
-        recent = torch.tensor([tokens[-model.context :]])
+        recent = torch.tensor([tokens[-model.context :]], device=device)
         scores, _ = model(recent)
         scores = scores[0, -1] / temperature
         if top_k:

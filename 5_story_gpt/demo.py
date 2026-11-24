@@ -11,6 +11,7 @@ Uses only Python's built-in web server. Nothing leaves this computer.
 """
 
 import json
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Lock
@@ -22,7 +23,7 @@ import torch.nn.functional as F
 from model import load_trained, write
 
 here = Path(__file__).parent
-PORT = 8000
+HOST, PORT = os.environ.get("HOST", "127.0.0.1"), int(os.environ.get("PORT", 8000))  # a web host sets these
 model, tokenizer, saved = load_trained()
 one_at_a_time = Lock()
 INFO = {
@@ -38,7 +39,7 @@ def next_piece_odds(text, how_many=8):
     tokens = tokenizer.encode(text)[-model.context :]
     if not tokens:
         return []
-    scores, _ = model(torch.tensor([tokens]))
+    scores, _ = model(torch.tensor([tokens], device=next(model.parameters()).device))
     odds = F.softmax(scores[0, -1], dim=-1)
     top = torch.topk(odds, how_many)
     return [{"piece": tokenizer.piece(i), "odds": round(p, 4)} for p, i in zip(top.values.tolist(), top.indices.tolist())]
@@ -69,6 +70,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Cache-Control", "no-cache")
+            self.send_header("X-Accel-Buffering", "no")  # asks a web host to pass each piece on at once
             self.end_headers()
 
             def say(message):
@@ -88,4 +90,4 @@ class Handler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     print(f"Model: {INFO['parameters']:,} adjustable numbers, trained for {INFO['steps']:,} steps")
     print(f"Open http://localhost:{PORT} in a browser. Press Ctrl+C here to stop.")
-    ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
+    ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()

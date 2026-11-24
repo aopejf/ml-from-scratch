@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.3/plotly.min.js"></script>
+<style>
+  :root { --bg:#f4f5f7; --card:#ffffff; --ink:#15181d; --soft:#626a76; --line:#dfe2e7; --accent:#1f5fd1; --good:#1a8754; --bad:#c0392b; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#111317; --card:#1a1d23; --ink:#e8eaee; --soft:#98a0ad; --line:#2c313a; --accent:#6ea0ff; --good:#4cc38a; --bad:#ff7b6b; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 system-ui, "Segoe UI", sans-serif; }
+  main { max-width:1280px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  .sub { color:var(--soft); margin:0 0 18px; }
+  form { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:18px; }
+  input[type=text] { flex:1 1 280px; min-width:0; padding:10px 12px; font:16px ui-monospace, Consolas, monospace; text-transform:uppercase;
+    color:var(--ink); background:var(--card); border:1px solid var(--line); border-radius:8px; }
+  select, button { padding:10px 14px; font:15px system-ui, sans-serif; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); }
+  button { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:default; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  #message { color:var(--bad); min-height:1.4em; margin:0 0 8px; }
+  .grid { display:grid; grid-template-columns:repeat(12, 1fr); gap:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 12px 6px; min-width:0; }
+  .card h2 { font-size:14px; margin:2px 4px 0; }
+  .card p { color:var(--soft); font-size:12.5px; margin:2px 4px 0; }
+  .plot { height:320px; }
+  .w8 { grid-column:span 8; } .w4 { grid-column:span 4; } .w12 { grid-column:span 12; }
+  @media (max-width: 900px) { .w8, .w4 { grid-column:span 12; } }
+  .tablewrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; margin:8px 0; }
+  th, td { padding:8px 10px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th:first-child, td:first-child { text-align:left; font-weight:600; }
+  th { color:var(--soft); font-weight:500; font-size:13px; }
+  .up { color:var(--good); } .down { color:var(--bad); }
+  footer { color:var(--soft); font-size:12.5px; margin-top:18px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Portfolio dashboard</h1>
+  <p class="sub">Returns, volatility, drawdowns and correlations for any handful of stocks, from real prices.</p>
+  <form id="form">
+    <input id="tickers" type="text" value="AAPL MSFT JPM XOM JNJ SPY" aria-label="Stock symbols, separated by spaces" autocomplete="off" spellcheck="false">
+    <select id="years" aria-label="Time span">
+      <option value="1">1 year</option><option value="3">3 years</option><option value="5" selected>5 years</option><option value="10">10 years</option>
+    </select>
+    <button id="go">Update</button>
+  </form>
+  <p id="message" role="alert"></p>
+  <div class="grid">
+    <section class="card w8"><h2>Growth of $1</h2><p>Dividends included. The dashed line is equal money in each.</p><div id="growth" class="plot"></div></section>
+    <section class="card w4"><h2>Risk versus return</h2><p>Up and to the left is better.</p><div id="risk" class="plot"></div></section>
+    <section class="card w4"><h2>Drawdown</h2><p>How far below its previous peak.</p><div id="drawdown" class="plot"></div></section>
+    <section class="card w4"><h2>Volatility, previous 3 months</h2><p>When the ride was bumpy.</p><div id="rolling" class="plot"></div></section>
+    <section class="card w4"><h2>Correlation of daily moves</h2><p>1 means they always move together.</p><div id="correlation" class="plot"></div></section>
+    <section class="card w12"><h2>Summary</h2><p id="span"></p><div class="tablewrap"><table id="summary"></table></div></section>
+  </div>
+  <footer>Prices from Yahoo Finance. This describes the past. It is not a forecast and not investment advice.</footer>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const palette = ["#2a6fdb", "#c0392b", "#2e9e6b", "#d9a441", "#7d4fc4", "#3aa7b8", "#d0679d", "#6b7280"];
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const pct = (v, sign) => (sign && v > 0 ? "+" : "") + (v * 100).toFixed(1) + "%";
+
+function layout(extra) {
+  const ink = css("--ink"), line = css("--line");
+  return Object.assign({
+    margin: { l: 48, r: 12, t: 10, b: 34 }, paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: ink, size: 12 }, showlegend: false, hovermode: "x unified",
+    xaxis: { gridcolor: line, linecolor: line }, yaxis: { gridcolor: line, linecolor: line, zerolinecolor: line },
+  }, extra);
+}
+const options = { displayModeBar: false, responsive: true };
+
+function lines(target, d, values, yaxis, legend) {
+  const traces = d.names.map((name, i) => ({
+    x: d.dates, y: values[name], name, mode: "lines",
+    line: name === "Equal mix" ? { color: css("--ink"), width: 2.4, dash: "dash" } : { color: palette[i % palette.length], width: 1.4 },
+  }));
+  Plotly.react(target, traces, layout({ yaxis: Object.assign({ gridcolor: css("--line") }, yaxis), showlegend: !!legend,
+    legend: { orientation: "h", y: 1.12, x: 0 }, margin: { l: 48, r: 12, t: legend ? 30 : 10, b: 34 } }), options);
+}
+
+function draw(d) {
+  const colour = name => name === "Equal mix" ? css("--ink") : palette[d.names.indexOf(name) % palette.length];
+  lines("growth", d, d.growth, { type: "log", tickprefix: "$", dtick: Math.log10(2), tickformat: ".2~f" }, true);
+  lines("drawdown", d, d.drawdown, { tickformat: ".0%" });
+  lines("rolling", d, d.rolling_volatility, { tickformat: ".0%" });
+
+  Plotly.react("risk", [{
+    x: d.summary.map(r => r["Volatility"]), y: d.summary.map(r => r["Return per year"]), text: d.summary.map(r => r.name),
+    mode: "markers+text", textposition: "top center", cliponaxis: false,
+    marker: { size: 14, color: d.summary.map(r => colour(r.name)), symbol: d.summary.map(r => r.name === "Equal mix" ? "diamond" : "circle") },
+    hovertemplate: "%{text}<br>volatility %{x:.1%}<br>return %{y:.1%} a year<extra></extra>",
+  }], layout({ hovermode: "closest", xaxis: { title: "volatility", tickformat: ".0%", gridcolor: css("--line") },
+    yaxis: { title: "return per year", tickformat: ".0%", gridcolor: css("--line"), zerolinecolor: css("--soft") }, margin: { l: 64, r: 36, t: 24, b: 44 } }), options);
+
+  Plotly.react("correlation", [{
+    z: d.correlation, x: d.tickers, y: d.tickers, type: "heatmap", zmin: -1, zmax: 1, colorscale: "RdBu", reversescale: true,
+    text: d.correlation.map(row => row.map(v => v.toFixed(2))), texttemplate: "%{text}", showscale: false,
+    hovertemplate: "%{y} and %{x}: %{z:.2f}<extra></extra>",
+  }], layout({ hovermode: "closest", yaxis: { autorange: "reversed" }, margin: { l: 52, r: 12, t: 10, b: 34 } }), options);
+
+  const columns = ["$1 became", "Return per year", "Volatility", "Return / volatility", "Worst drop", "Worst day", "Best day"];
+  const show = { "$1 became": v => "$" + v.toFixed(2), "Return / volatility": v => v.toFixed(2), "Volatility": v => pct(v) };
+  const table = $("summary");
+  table.replaceChildren();
+  const head = table.insertRow();
+  for (const name of ["", ...columns]) { const th = document.createElement("th"); th.textContent = name; head.append(th); }
+  for (const row of d.summary) {
+    const tr = table.insertRow();
+    tr.insertCell().textContent = row.name;
+    for (const column of columns) {
+      const cell = tr.insertCell(), v = row[column];
+      cell.textContent = (show[column] || (x => pct(x, true)))(v);
+      if (!show[column]) cell.className = v >= 0 ? "up" : "down";
+    }
+  }
+  $("span").textContent = d.span + ". Sorted by return for the risk taken, best first.";
+}
+
+async function update(event) {
+  if (event) event.preventDefault();
+  $("go").disabled = true; $("go").textContent = "Loading..."; $("message").textContent = "";
+  try {
+    const query = new URLSearchParams({ tickers: $("tickers").value, years: $("years").value });
+    const reply = await fetch("/data?" + query), d = await reply.json();
+    if (d.error) $("message").textContent = d.error;
+    else if (!window.Plotly) $("message").textContent = "The chart library did not load. Check your internet connection and refresh.";
+    else draw(d);
+  } catch (problem) { $("message").textContent = "Could not reach the dashboard server."; console.error(problem); }
+  $("go").disabled = false; $("go").textContent = "Update";
+}
+$("form").addEventListener("submit", update);
+update();
+</script>
+</body>
+</html>

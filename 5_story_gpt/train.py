@@ -4,6 +4,7 @@ Step 2 of the story GPT: train it.
     python train.py 7            train for 7 hours, then stop and write the report
     python train.py 7 --resume   carry on from the last checkpoint
     python train.py 0 --resume   no more training, just write the report
+    python train.py 2.5 --big    the larger model, meant for a graphics card (see train_colab.ipynb)
 
 Training runs to a time limit, not a step count, so it finishes when you
 expect it to. Every 10 minutes it saves a checkpoint, so nothing is lost if
@@ -12,7 +13,9 @@ the laptop sleeps or the run is stopped.
 It prints the loss every 10 steps with a short sample of its writing, and
 checks itself on stories it has never seen every 250 steps.
 
-It saves:
+It uses a graphics card if there is one, and the processor if not.
+
+It saves (with --big, each name gets "_big" added, so the laptop model is kept):
     checkpoint.pt   everything needed to carry on
     model.pt        the finished model
     samples.md      the same prompt, continued at different points in training
@@ -31,7 +34,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-from model import CONFIG, new_model, write
+from model import BIG_CONFIG, CONFIG, new_model, write
 from tokenizer import Tokenizer
 
 torch.manual_seed(0)
@@ -45,7 +48,13 @@ if sys.platform == "win32":
 
 HOURS = float(sys.argv[1]) if len(sys.argv) > 1 else 7
 RESUME = "--resume" in sys.argv
-BATCH = 32
+BIG = "--big" in sys.argv
+CONFIG = BIG_CONFIG if BIG else CONFIG
+TAG = "_big" if BIG else ""
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+FAST_MATHS = DEVICE == "cuda"  # half-size numbers on a graphics card: about twice as fast, same result
+BATCH = 64 if BIG else 32
+PRINT_EVERY = 100 if DEVICE == "cuda" else 10
 TOP_LEARNING_RATE = 1e-3
 WARMUP_STEPS = 200
 CHECK_EVERY = 250
@@ -58,7 +67,8 @@ train_data = np.memmap(here / "data" / "train.bin", dtype=np.uint16, mode="r")
 unseen_data = np.memmap(here / "data" / "valid.bin", dtype=np.uint16, mode="r")
 print(f"Stories: {len(train_data):,} word pieces to train on, {len(unseen_data):,} held back")
 
-model = new_model(tokenizer.vocab_size)
+model = new_model(tokenizer.vocab_size, CONFIG).to(DEVICE)
+scaler = torch.amp.GradScaler(DEVICE, enabled=FAST_MATHS)
 optimizer = torch.optim.AdamW(model.parameters(), lr=TOP_LEARNING_RATE, weight_decay=0.01)
 context = CONFIG["context"]
 step, seconds_done = 0, 0.0
@@ -66,14 +76,14 @@ history = {"step": [], "minutes": [], "train": [], "unseen": []}
 kept_samples = []
 
 if RESUME:
-    saved = torch.load(here / "checkpoint.pt", map_location="cpu")
+    saved = torch.load(here / f"checkpoint{TAG}.pt", map_location=DEVICE)
     model.load_state_dict(saved["model"])
     optimizer.load_state_dict(saved["optimizer"])
     step, seconds_done = saved["step"], saved["seconds_done"]
     history, kept_samples = saved["history"], saved["kept_samples"]
     print(f"Carrying on from step {step} ({seconds_done / 3600:.2f} hours already done)")
 
-print(f"Model: {sum(p.numel() for p in model.parameters()):,} adjustable numbers")
+print(f"Model: {sum(p.numel() for p in model.parameters()):,} adjustable numbers, running on {torch.cuda.get_device_name(0) if DEVICE == 'cuda' else 'the processor'}")
 print(f"Time limit: {HOURS} hours in total\n", flush=True)
 budget = HOURS * 3600
 
@@ -82,7 +92,7 @@ def get_batch(data):
     starts = np.random.randint(0, len(data) - context - 1, BATCH)
     x = np.stack([data[s : s + context] for s in starts]).astype(np.int64)
     y = np.stack([data[s + 1 : s + context + 1] for s in starts]).astype(np.int64)
-    return torch.from_numpy(x), torch.from_numpy(y)
+    return torch.from_numpy(x).to(DEVICE), torch.from_numpy(y).to(DEVICE)
 
 
 @torch.no_grad()
@@ -94,7 +104,7 @@ def loss_on(data, batches=12):
 
 
 def save_checkpoint(seconds):
-    temporary = here / "checkpoint.tmp"
+    temporary = here / f"checkpoint{TAG}.tmp"
     torch.save(
         {
             "model": model.state_dict(),
@@ -107,7 +117,7 @@ def save_checkpoint(seconds):
         },
         temporary,
     )
-    temporary.replace(here / "checkpoint.pt")  # swap in one move, so a crash cannot leave half a file
+    temporary.replace(here / f"checkpoint{TAG}.pt")  # swap in one move, so a crash cannot leave half a file
 
 
 np.random.seed(step)
@@ -139,17 +149,20 @@ while True:
         print(write(model, tokenizer, PROMPT, 100)[0] + "\n", flush=True)
 
     x, y = get_batch(train_data)
-    _, loss = model(x, y)  # guess and score
+    with torch.autocast(DEVICE, dtype=torch.float16, enabled=FAST_MATHS):
+        _, loss = model(x, y)  # guess and score
     optimizer.zero_grad()
-    loss.backward()  # work out the nudge
+    scaler.scale(loss).backward()  # work out the nudge
+    scaler.unscale_(optimizer)
     torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-    optimizer.step()  # nudge
+    scaler.step(optimizer)  # nudge
+    scaler.update()
     step += 1
     recent.append(loss.item())
 
-    if step % 10 == 0:
+    if step % PRINT_EVERY == 0:
         sample = write(model, tokenizer, PROMPT, 25)[1].replace("\n", " ")
-        print(f"step {step:6d}  {minutes:4.0f} min  loss {np.mean(recent[-10:]):.3f}  |{sample}", flush=True)
+        print(f"step {step:6d}  {minutes:4.0f} min  loss {np.mean(recent[-PRINT_EVERY:]):.3f}  |{sample}", flush=True)
 
     if time.time() - last_save > SAVE_EVERY_MINUTES * 60:
         save_checkpoint(seconds_done + time.time() - session_start)
@@ -164,11 +177,11 @@ save_checkpoint(seconds_done)
 train_loss, unseen_loss = loss_on(train_data, 50), loss_on(unseen_data, 50)
 print(f"\nFinished: {step:,} steps in {seconds_done / 3600:.2f} hours")
 print(f"Loss on training stories {train_loss:.3f}, on unseen stories {unseen_loss:.3f}")
-torch.save({"model": model.state_dict(), "config": CONFIG, "step": step, "hours": seconds_done / 3600, "train_loss": train_loss, "unseen_loss": unseen_loss}, here / "model.pt")
+torch.save({"model": model.state_dict(), "config": CONFIG, "step": step, "hours": seconds_done / 3600, "train_loss": train_loss, "unseen_loss": unseen_loss}, here / f"model{TAG}.pt")
 
 torch.manual_seed(1)
 final_story = write(model, tokenizer, PROMPT, 180)[0]
-with open(here / "samples.md", "w", encoding="utf-8") as f:
+with open(here / f"samples{TAG}.md", "w", encoding="utf-8") as f:
     f.write("# The same prompt, as training goes on\n\n")
     f.write(f"Prompt: **{PROMPT}**\n\n")
     for at_step, at_minute, text in kept_samples:
@@ -183,6 +196,6 @@ ax.set_ylabel("loss (lower is better)")
 ax.set_title("Story GPT: loss during training")
 ax.legend()
 fig.tight_layout()
-fig.savefig(here / "result.png", dpi=110)
-print("\nSaved: model.pt, samples.md, result.png")
+fig.savefig(here / f"result{TAG}.png", dpi=110)
+print(f"\nSaved: model{TAG}.pt, samples{TAG}.md, result{TAG}.png")
 print("\n" + final_story)

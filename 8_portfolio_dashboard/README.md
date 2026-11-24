@@ -7,6 +7,18 @@ returns, volatility, drawdowns, correlations, and risk versus return.
 
 > This describes the past. It is not a forecast and not investment advice.
 
+## The interactive version
+
+```powershell
+python app.py
+```
+
+Then open http://localhost:8050. Type any 2 to 8 stock symbols, pick 1 to 10 years, and every chart
+redraws. Hover over a chart to read exact values; drag to zoom.
+
+It is a small web page (`app.html`, charts drawn with Plotly) served by Python's built-in web server
+(`app.py`). Both the page and the picture above get their numbers from the same file, `metrics.py`.
+
 ## What each panel answers
 
 | Panel | Question | How it is worked out |

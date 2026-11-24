@@ -29,53 +29,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from metrics import MIX, compute, load_prices
+
 here = Path(__file__).parent
 TICKERS = [t.upper() for t in sys.argv[1:]] or ["AAPL", "MSFT", "JPM", "XOM", "JNJ", "SPY"]
 START, END = "2021-11-22", "2026-11-21"  # fixed dates, so the numbers can be reproduced
-TRADING_DAYS = 252  # per year
-MIX = "Equal mix"
 
 # ---------------------------------------------------------------------------
-# 1. Prices. Downloaded once, then kept in a file.
+# 1. Prices and numbers. The calculations are in metrics.py.
 # ---------------------------------------------------------------------------
-saved = here / "data" / ("prices_" + "_".join(TICKERS) + ".csv")
-if saved.exists():
-    prices = pd.read_csv(saved, index_col=0, parse_dates=True)
-else:
-    import yfinance as yf
-
-    # auto_adjust folds dividends and share splits into the price, so growth is the true total.
-    prices = yf.download(TICKERS, start=START, end=END, auto_adjust=True, progress=False)["Close"]
-    saved.parent.mkdir(exist_ok=True)
-    prices.to_csv(saved)
-prices = prices[TICKERS].dropna()
+prices = load_prices(TICKERS, START, END)
 print(f"Prices: {len(prices):,} trading days, {prices.index[0].date()} to {prices.index[-1].date()}, for {', '.join(TICKERS)}\n")
-
-# ---------------------------------------------------------------------------
-# 2. The numbers. Everything comes from one thing: the daily % change.
-# ---------------------------------------------------------------------------
-daily = prices.pct_change().dropna()
-daily[MIX] = daily[TICKERS].mean(axis=1)
-
-growth = (1 + daily).cumprod()  # what $1 became
-years = len(daily) / TRADING_DAYS
-yearly_return = growth.iloc[-1] ** (1 / years) - 1  # the steady yearly rate that gives the same end result
-volatility = daily.std() * np.sqrt(TRADING_DAYS)  # typical size of a year's swings
-drawdown = growth / growth.cummax() - 1  # how far below its own previous peak
-correlation = daily[TICKERS].corr()
-rolling_volatility = daily.rolling(63).std() * np.sqrt(TRADING_DAYS)  # bumpiness over the last 3 months
-
-summary = pd.DataFrame(
-    {
-        "$1 became": growth.iloc[-1],
-        "Return per year": yearly_return,
-        "Volatility": volatility,
-        "Return / volatility": yearly_return / volatility,  # Sharpe ratio with a 0% risk-free rate
-        "Worst drop": drawdown.min(),
-        "Worst day": daily.min(),
-        "Best day": daily.max(),
-    }
-).sort_values("Return / volatility", ascending=False)
+numbers = compute(prices)
+daily, growth, yearly_return, volatility = numbers["daily"], numbers["growth"], numbers["yearly_return"], numbers["volatility"]
+drawdown, correlation, rolling_volatility, summary = numbers["drawdown"], numbers["correlation"], numbers["rolling_volatility"], numbers["summary"]
 
 as_text = summary.copy()
 as_text["$1 became"] = summary["$1 became"].map("${:.2f}".format)

@@ -3,11 +3,45 @@
 An applied project: a car wash sells monthly memberships and can afford to contact 10% of its
 members each month with a "please stay" offer. **Which 10% should it contact?**
 
-> **All the data here is made up.** `make_data.py` invents 20,000 members. No real customers
+The project has two halves: the method on a real public dataset, and the same method on a made-up car wash
+list where the true answers are known.
+
+## On real data: 7,043 telecom customers
+
+![Leavers reached, what the model relies on, and whether its percentages are honest](result_telco.png)
+
+IBM's public Telco Customer Churn dataset: real customers of a phone and internet company, 26.5% of whom left.
+Every customer was scored by a model that never saw them in training (5-fold cross-validation).
+
+| How the 704 customers to contact are chosen | Leavers reached | Hit rate | Ranking score (ROC AUC) |
+|---|---|---|---|
+| At random | 183 | 26% | 0.51 |
+| Simple rule: no contract, newest customers first | 432 | 61% | 0.78 |
+| Logistic regression | 530 | 75% | 0.85 |
+| Gradient-boosted trees | 529 | 75% | 0.85 |
+
+- Of the customers the model picks, **3 in 4 really were about to leave**. Picking at random, it is 1 in 4.
+- The model beats the sensible rule of thumb by 23%: 98 more leavers reached for the same number of calls.
+- Logistic regression ties the more complex model, so the simple, explainable one is the right choice here.
+- It leans on how long someone has been a customer, their contract type, and their internet service. Those match what the simple rule already guessed, plus detail the rule misses.
+
+Run it:
+
+```powershell
+curl.exe -L --create-dirs -o data/telco.csv https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv
+```
+
+```powershell
+python telco.py
+```
+
+## On made-up data: a car wash membership
+
+> **All the data in this half is made up.** `make_data.py` invents 20,000 members. No real customers
 > or business are involved. That keeps the project shareable, and it means the true reasons
 > for cancelling are known, so the model can be checked against them.
 
-## Result
+### Result
 
 ![Cancellers reached, what the model relies on, and whether its percentages are honest](result.png)
 
@@ -63,8 +97,8 @@ Needs `pandas` as well as the packages from the main README: `python -m pip inst
 
 ## Limits
 
-- The data is made up, so this shows the method works, not that these exact numbers would hold for a real business.
-  Real cancellations have causes nobody recorded.
+- The car wash data is made up, so that half shows the method works, not that those exact numbers would hold for a
+  real business. The telecom half is real but is one company's customers at one moment.
 - Even the best model reaches 36% of cancellers at this budget. Much of cancelling is luck the data cannot see;
   that is built into the made-up data on purpose, because real life is the same.
 - It predicts who will cancel, not who can be persuaded to stay. Some members will leave whatever you offer, and some

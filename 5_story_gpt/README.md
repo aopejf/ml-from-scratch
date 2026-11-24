@@ -37,6 +37,27 @@ Loss fell from 8.52 to 1.95 on stories the model never saw. Loss on its training
 learned general patterns and did not memorise. (The two projects' loss numbers cannot be compared with
 each other: guessing 1 letter of 65 is an easier task than guessing 1 piece of 4,096.)
 
+## Scored test
+
+Loss says how well it guesses the next piece, not whether the stories hold together. So `evaluate.py` takes the
+openings of 200 stories the model never saw, has the model write each ending, and scores them with the same
+checks as the real endings:
+
+| | This model | Real stories |
+|---|---|---|
+| Finishes the story (reaches an ending before the length limit) | 96% | 100% |
+| Keeps the hero (the named character from the opening is still in the ending) | 93% | 98% |
+| Repeats itself (share of four-word phrases it had already used) | 1% | 1% |
+| New names introduced per story | 0.8 | 0.6 |
+| Length in words | 125 | 130 |
+
+On structure it is close to the real thing. These checks cannot see whether a story makes sense, and reading
+the endings in [`evaluation.md`](evaluation.md) shows that is where it falls short: events do not follow from each other.
+
+```powershell
+python evaluate.py
+```
+
 ## How it works
 
 1. **Tokenizer** (`tokenizer.py`). Starts with single bytes, then repeatedly glues together the most common
@@ -62,6 +83,25 @@ Or in the terminal:
 ```powershell
 python generate.py "Lily found a shiny key in the garden."
 ```
+
+## Put it online
+
+`make_space.py` gathers the model, the code and two setup files into `space_upload/`, ready for
+[Hugging Face Spaces](https://huggingface.co/spaces), a free host for machine learning demos.
+
+```powershell
+python make_space.py
+```
+
+Then on huggingface.co: **New Space**, choose **Docker** and the **Blank** template, create it, open
+**Files > Add file > Upload files**, and drag in everything inside `space_upload/`. The page builds itself in a few minutes.
+
+## A bigger model on a free graphics card
+
+`train_colab.ipynb` trains a model four times the size (13.9 million parameters, context of 256 pieces) on
+Google Colab's free graphics card in about 2.5 hours:
+[open it in Colab](https://colab.research.google.com/github/aopejf/ml-from-scratch/blob/main/5_story_gpt/train_colab.ipynb).
+`train.py --big` is the same trainer; it uses a graphics card when there is one.
 
 ## Train it yourself
 
@@ -92,6 +132,9 @@ python train.py 6.5
 - `model.py`: builds the model and writes text with it.
 - `train.py`: time-limited training with checkpoints.
 - `generate.py`, `demo.py`, `demo.html`: ways to use the trained model.
+- `evaluate.py`, `evaluation.md`: the scored test and its results.
+- `make_space.py`: gathers the files for putting the page online.
+- `train_colab.ipynb` (written by `make_notebook.py`): trains the bigger model on a free graphics card.
 - `model.pt`, `tokenizer.json`: the trained model and its tokenizer.
 - `samples.md`: the same prompt at different points in training.
 
@@ -102,7 +145,8 @@ python train.py 6.5
   track a plot. The TinyStories authors got coherent plots from models a few times larger trained far longer on graphics cards.
 - It saw about 48 million word pieces, less than half of the text I prepared. The loss was still falling when time ran out.
 - The model size was chosen to fit one night on a laptop processor (about 2,000 pieces a second), not because it is the best size.
-- There is no measure of story quality here beyond loss and reading the samples.
+- The scored test measures structure (endings, characters, repetition), not sense. Judging whether a plot is coherent still means reading the stories.
+- The graphics-card path of the trainer was tested on a processor only; the bigger model's results are not in yet.
 
 ## Data
 
