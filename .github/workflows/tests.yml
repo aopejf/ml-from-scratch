@@ -28,3 +28,5 @@ jobs:
         run: node tests/check_web_model.js
       - name: Check the dashboard sums against the Python ones
         run: node tests/check_site28.js
+      - name: Check the valuation page sums against the Python ones
+        run: node tests/check_dcf.js

@@ -1,0 +1,16 @@
+{
+  "name": "Costco Wholesale",
+  "ticker": "COST",
+  "cik": "0000909832",
+  "price": 1097.91,
+  "price_date": "2026-11-23",
+  "shares_outstanding": 443129349,
+  "shares_as_of": "2026-09-29",
+  "risk_free_rate": 0.0492,
+  "risk_free_date": "2026-11-23",
+  "sources": [
+    "SEC EDGAR company facts",
+    "Yahoo Finance",
+    "FRED series DGS10"
+  ]
+}

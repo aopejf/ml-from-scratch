@@ -3,10 +3,10 @@
 [![tests](https://github.com/aopejf/ml-from-scratch/actions/workflows/tests.yml/badge.svg)](https://github.com/aopejf/ml-from-scratch/actions/workflows/tests.yml)
 
 Ten projects that build machine learning up from a single neuron to a language model you can type into,
-with the core parts written by hand instead of called from a library, plus one applied finance project. Every result below is measured, and
+with the core parts written by hand instead of called from a library, plus two applied finance projects. Every result below is measured, and
 every project says what it cannot do.
 
-## Start with these four
+## Start with these five
 
 ### 1. A GPT that writes stories, built end to end ([`5_story_gpt`](5_story_gpt))
 
@@ -53,7 +53,20 @@ explained to the dollar, what a member is worth, a tested forecast, and a build-
 - Found all four problems planted in the data, with a dollar value on the fixable ones, and no false alarms.
 - The same model exists in Python, Excel and JavaScript, and the three are checked against each other.
 
-## All eleven
+### 5. What is a company worth? ([`11_company_valuation`](11_company_valuation))
+
+![Sales, free cash flow, the value build-up and the sensitivity table](11_company_valuation/result.png)
+
+A discounted cash flow valuation of a real listed company, built from the accounts it files with the regulator.
+It values the business, shows how far the answer moves when the assumptions move, and then works backwards from the
+share price to what buyers must be assuming. A method, not advice.
+
+**[Open the interactive valuation](https://aopejf.github.io/ml-from-scratch/valuation/)** | [Excel model](11_company_valuation/company_valuation_model.xlsx)
+
+- The model's answer is about a quarter of the share price, and the page shows exactly which assumptions would close the gap.
+- A company growing at one steady rate gets the textbook answer to twelve decimal places; Python, Excel and JavaScript agree.
+
+## All twelve
 
 | # | Folder | Official name | What it does | Result |
 |---|--------|---------------|--------------|--------|
@@ -68,8 +81,9 @@ explained to the dollar, what a member is worth, a tested forecast, and a build-
 | 8 | [`8_portfolio_dashboard`](8_portfolio_dashboard) | Portfolio risk analytics | An interactive dashboard of returns, volatility, drawdowns and correlations for any stocks | An equal mix of six holdings had 15.5% volatility against a 23.9% average |
 | 9 | [`9_neural_net_numpy`](9_neural_net_numpy) | Multilayer perceptron, loss landscape (PCA) | A neural net in pure NumPy, with a map of the path training took | 100% on new points; hand-written gradients correct to 1e-10 |
 | 10 | [`10_car_wash_finance`](10_car_wash_finance) | Unit economics, variance analysis, NPV and IRR | A finance pack for a made-up 27-site chain: scorecard, budget bridge, forecast, investment decision | Finds every planted problem; Excel, Python and JavaScript agree |
+| 11 | [`11_company_valuation`](11_company_valuation) | Discounted cash flow (DCF), WACC, reverse DCF | Values a real company from its filed accounts and shows what its share price assumes | $293 a share against a price of $1,098; the price needs 42% growth or an 11.5% margin |
 
-Projects 0 to 6 are in order because each one uses the ideas from the ones before. Projects 7 to 10 stand alone.
+Projects 0 to 6 are in order because each one uses the ideas from the ones before. Projects 7 to 11 stand alone.
 
 ## The one idea behind all of them
 
@@ -110,7 +124,8 @@ Everything here was trained on a laptop processor, with no graphics card.
 python -m pytest
 ```
 
-24 automatic checks in [`tests`](tests), plus two that compare JavaScript code with its Python original, run on every change (the badge at the top). They test claims the projects
+33 automatic checks in [`tests`](tests), plus three that compare JavaScript code with its Python original, run on every change (the badge at the top). They test claims the projects
 depend on: that backpropagation gives the right gradients, that the GPT cannot see words ahead of the one it is
 predicting, that the tokenizer gives back exactly the text that went in, that the portfolio numbers are right
-on prices with known answers, and that the finance pack's budget bridge adds up to the cent.
+on prices with known answers, that the finance pack's budget bridge adds up to the cent, and that the valuation gives the textbook answer for a company
+with a known value.
