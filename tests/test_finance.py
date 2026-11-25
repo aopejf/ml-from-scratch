@@ -36,9 +36,9 @@ def test_payback_counts_part_years_and_admits_never():
     assert finance.payback_years([-1000, 100, 100]) is None
 
 
-def test_site_24_is_worth_more_with_more_cars(data):
+def test_site_28_is_worth_more_with_more_cars(data):
     econ = finance.site_economics(data)
-    values = [finance.npv(0.10, finance.site24_cash_flows(cars, 20000, 4_000_000, econ)[0]) for cars in (100_000, 130_000, 160_000)]
+    values = [finance.npv(0.10, finance.site28_cash_flows(cars, 20000, 4_000_000, econ)[0]) for cars in (100_000, 130_000, 160_000)]
     assert values[0] < values[1] < values[2]
 
 
@@ -46,7 +46,7 @@ def test_site_24_is_worth_more_with_more_cars(data):
 
 
 def test_budget_bridge_adds_up_exactly(data):
-    for site in (None, 3, 11, 23):  # the chain, an ordinary site, and the site that opened late
+    for site in (None, 3, 11, 27):  # the chain, an ordinary site, and the site that opened late
         v = finance.variance(data, site_id=site)
         assert v["budget_profit"] + sum(v["effects"].values()) == pytest.approx(v["actual_profit"], abs=0.01)
 
@@ -61,8 +61,8 @@ def test_scorecard_finds_the_planted_problems(data):
     assert "leaving fast" in flags[11]
     assert "Chemical use high" in flags[14]
     assert "Barely profitable" in flags[18]
-    assert flags[23] == "Still filling up"  # a new site is not called a failure
-    clean = [s for s in range(1, 21) if s not in (7, 11, 14, 18)]
+    assert flags[27] == "Still filling up"  # a new site is not called a failure
+    clean = [s for s in range(1, 25) if s not in (7, 11, 14, 18)]
     assert all(flags[s] == "" for s in clean)  # and no false alarms
 
 

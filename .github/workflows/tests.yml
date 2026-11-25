@@ -27,4 +27,4 @@ jobs:
       - name: Check the JavaScript model against the Python one
         run: node tests/check_web_model.js
       - name: Check the dashboard sums against the Python ones
-        run: node tests/check_site24.js
+        run: node tests/check_site28.js

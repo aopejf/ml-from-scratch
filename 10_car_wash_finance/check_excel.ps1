@@ -21,8 +21,8 @@ function Compare-Value($label, $excelValue, $pythonValue, $tolerance) {
 
 try {
     $book = $excel.Workbooks.Open((Join-Path $here "car_wash_finance_model.xlsx"), 0, $true)
-    $s = $book.Worksheets.Item("Site 24")
-    foreach ($c in $results.site24.candidates) {
+    $s = $book.Worksheets.Item("Site 28")
+    foreach ($c in $results.site28.candidates) {
         foreach ($case in "Low", "Expected", "High") {
             $s.Range("B4").Value2 = $c.candidate
             $s.Range("B5").Value2 = $case
@@ -36,8 +36,8 @@ try {
     }
     $sc = $book.Worksheets.Item("Scorecard")
     $y = $results.chain.by_year."2025"
-    Compare-Value "Scorecard: chain revenue 2025" $sc.Range("B28").Value2 $y.revenue 1
-    Compare-Value "Scorecard: chain profit 2025" $sc.Range("D28").Value2 $y.site_profit 1
+    Compare-Value "Scorecard: chain revenue 2025" $sc.Range("B$(5 + $results.scorecard.Count)").Value2 $y.revenue 1
+    Compare-Value "Scorecard: chain profit 2025" $sc.Range("D$(5 + $results.scorecard.Count)").Value2 $y.site_profit 1
     foreach ($row in $results.scorecard | Where-Object { $_.site_id -in 3, 7, 14, 18 }) {
         $r = 4 + $row.site_id
         Compare-Value "Scorecard: $($row.name) margin" $sc.Range("E$r").Value2 $row.margin 0.0001

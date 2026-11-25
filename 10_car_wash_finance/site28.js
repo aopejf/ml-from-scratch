@@ -1,7 +1,7 @@
 /*
-The site-24 investment sums, in JavaScript, so the dashboard sliders can redo them instantly.
-The same sums as site24_cash_flows, npv, irr and payback_years in finance.py.
-tests/check_site24.js confirms the two give the same answers.
+The site-28 investment sums, in JavaScript, so the dashboard sliders can redo them instantly.
+The same sums as site28_cash_flows, npv, irr and payback_years in finance.py.
+tests/check_site28.js confirms the two give the same answers.
 */
 
 function npv(rate, flows) {
@@ -28,7 +28,7 @@ function paybackYears(flows) {
 }
 
 // cars: washes a year once full. econ and a: the "economics" and "assumptions" blocks in results.json.
-function site24(cars, rentPerMonth, buildCost, econ, a) {
+function site28(cars, rentPerMonth, buildCost, econ, a) {
   const flows = [-buildCost], profits = [];
   for (let year = 1; year <= a.years; year++) {
     const fill = a.ramp[Math.min(year, a.ramp.length) - 1];
@@ -50,4 +50,4 @@ function site24(cars, rentPerMonth, buildCost, econ, a) {
   };
 }
 
-if (typeof module !== "undefined") module.exports = { npv, irr, paybackYears, site24 };
+if (typeof module !== "undefined") module.exports = { npv, irr, paybackYears, site28 };

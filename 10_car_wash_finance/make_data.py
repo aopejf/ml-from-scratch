@@ -1,5 +1,5 @@
 """
-Invent the books of a 23-site car wash chain.
+Invent the books of a 27-site car wash chain.
 
     python make_data.py
 
@@ -14,7 +14,7 @@ Writes into data/:
     budget.csv       the 2025 budget, written the way a finance team would in late 2024
     cohorts.csv      for members who joined in a given month, how many are still members later
     corporate.csv    head-office cost per month
-    candidates.csv   three possible locations for site 24
+    candidates.csv   three possible locations for site 28
     chain.db         the same tables as a SQLite database, for the SQL queries
 
 Planted on purpose:
@@ -22,7 +22,7 @@ Planted on purpose:
     Site 11   had a competitor open next door in September 2024
     Site 14   has used far too much chemical per car since June 2025
     Site 18   sits on a quiet road with four competitors
-    Site 23   opened in April 2025 (the budget assumed February) and is still filling up
+    Site 27   opened in April 2025 (the budget assumed February) and is still filling up
     All sites raised the membership price by $2 in March 2025 (the budget assumed January)
 """
 
@@ -37,7 +37,7 @@ out = here / "data"
 out.mkdir(exist_ok=True)
 rng = np.random.default_rng(7)
 
-N_SITES = 23
+N_SITES = 27
 FIRST_KEPT, LAST = pd.Period("2023-01", "M"), pd.Period("2025-12", "M")
 BURN_IN_FROM = pd.Period("2015-01", "M")  # simulate earlier years so 2023 starts with a realistic member base
 
@@ -64,7 +64,7 @@ def monthly_cancel_rate(months_as_member):
 # ---------------------------------------------------------------------------
 # 1. The sites
 # ---------------------------------------------------------------------------
-regions = ["North"] * 8 + ["Central"] * 8 + ["South"] * 7
+regions = ["North"] * 9 + ["Central"] * 9 + ["South"] * 9
 sites = pd.DataFrame({
     "site_id": np.arange(1, N_SITES + 1),
     "name": [f"Site {i:02d}" for i in range(1, N_SITES + 1)],
@@ -74,13 +74,13 @@ sites = pd.DataFrame({
     "income": rng.integers(58, 108, N_SITES) * 1000,  # typical household income nearby
 })
 opened = [pd.Period(f"{rng.integers(2012, 2021)}-{rng.integers(1, 13):02d}", "M") for _ in range(N_SITES)]
-opened[20], opened[21], opened[22] = pd.Period("2023-03", "M"), pd.Period("2024-02", "M"), pd.Period("2025-04", "M")
+opened[-3], opened[-2], opened[-1] = pd.Period("2023-03", "M"), pd.Period("2024-02", "M"), pd.Period("2025-04", "M")
 sites["opened"] = [str(p) for p in opened]
 sites.loc[sites.site_id == 3, ["traffic", "competitors"]] = [43000, 0]  # the star
-sites.loc[sites.site_id == 18, ["traffic", "competitors"]] = [19000, 4]  # the quiet road
+sites.loc[sites.site_id == 18, ["traffic", "competitors"]] = [23000, 4]  # the quiet road
 sites.loc[sites.site_id == 11, "competitors"] = 1  # becomes 2 in September 2024
 
-# What drives volume. The site-24 model has to rediscover these from the results.
+# What drives volume. The site-28 model has to rediscover these from the results.
 luck = rng.normal(0, 800, N_SITES)
 sites["mature_cars_hidden"] = (3500 + 0.30 * sites.traffic - 1100 * sites.competitors + 0.035 * (sites.income - 80000) + luck).round()
 sites["rent"] = (6500 + 0.33 * sites.traffic + rng.normal(0, 1200, N_SITES)).round(-2)
@@ -187,7 +187,7 @@ for s in sites.itertuples():
     last_year = m24[m24.site_id == s.site_id].set_index("month")
     for month_number in range(1, 13):
         month = f"2025-{month_number:02d}"
-        if s.site_id == 23:  # the new site: planned to open in February and fill up over a year
+        if s.site_id == N_SITES:  # the new site: planned to open in February and fill up over a year
             age = month_number - 2
             if age < 0:
                 continue
@@ -201,7 +201,7 @@ for s in sites.itertuples():
             same_month = f"2024-{month_number:02d}"
             if same_month in last_year.index:
                 base = last_year.loc[same_month]
-            else:  # site 22 opened in February 2024, so it has no January: use its December
+            else:  # site 26 opened in February 2024, so it has no January: use its December
                 base = last_year.loc["2024-12"]
             december = last_year.loc["2024-12"]
             fee_2024 = last_year.membership_revenue.sum() / ((last_year.members_start + last_year.members_end) / 2).sum()
@@ -230,7 +230,7 @@ corporate = pd.DataFrame({
 corporate["overhead"] = [round(285000 * 1.045 ** ((pd.Period(m, "M").year - 2023)) * rng.normal(1, 0.02), 2) for m in corporate.month]
 
 # ---------------------------------------------------------------------------
-# 4. Three places site 24 could go
+# 4. Three places site 28 could go
 # ---------------------------------------------------------------------------
 candidates = pd.DataFrame({
     "candidate": ["A: Retail park", "B: Commuter road", "C: Edge of town"],

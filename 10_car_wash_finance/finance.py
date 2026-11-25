@@ -275,7 +275,7 @@ def backtest(data):
 
 
 # ---------------------------------------------------------------------------
-# 5. Site 24
+# 5. Site 28
 # ---------------------------------------------------------------------------
 def npv(rate, cash_flows):
     """cash_flows[0] is today (usually the negative build cost), then one per year."""
@@ -303,7 +303,7 @@ def payback_years(cash_flows):
     return None
 
 
-SITE24_ASSUMPTIONS = dict(
+SITE28_ASSUMPTIONS = dict(
     discount_rate=0.10,       # the return the owners require
     years=10,
     ramp=[0.55, 0.85, 1.0],   # share of full volume in years 1, 2, 3 onward
@@ -345,7 +345,7 @@ def site_economics(data, year=2025):
                 cost_per_car=per_car, fixed_cost_per_year=fixed * 12, card_fee_share=0.026)
 
 
-def site24_cash_flows(cars, rent_per_month, build_cost, econ, a=SITE24_ASSUMPTIONS):
+def site28_cash_flows(cars, rent_per_month, build_cost, econ, a=SITE28_ASSUMPTIONS):
     flows, profits = [-build_cost], []
     for year in range(1, a["years"] + 1):
         fill = a["ramp"][min(year, len(a["ramp"])) - 1]
@@ -359,14 +359,14 @@ def site24_cash_flows(cars, rent_per_month, build_cost, econ, a=SITE24_ASSUMPTIO
     return flows, profits
 
 
-def site24(data, a=SITE24_ASSUMPTIONS):
+def site28(data, a=SITE28_ASSUMPTIONS):
     model, econ = volume_model(data), site_economics(data)
     results = []
     for c in data["candidates"].itertuples():
         expected, miss = predict_cars(model, c.traffic, c.competitors, c.income)
         cases = {}
         for label, cars in [("Low", expected - 1.3 * miss), ("Expected", expected), ("High", expected + 1.3 * miss)]:
-            flows, profits = site24_cash_flows(cars, c.rent, c.build_cost, econ, a)
+            flows, profits = site28_cash_flows(cars, c.rent, c.build_cost, econ, a)
             cases[label] = dict(cars=cars, npv=npv(a["discount_rate"], flows), irr=irr(flows),
                                 payback_years=payback_years(flows[:-1] + [flows[-1] - a["exit_multiple"] * profits[-1]]),
                                 mature_profit=profits[2], flows=flows)
@@ -374,7 +374,7 @@ def site24(data, a=SITE24_ASSUMPTIONS):
         low, high = 0.0, 400_000.0
         for _ in range(60):
             mid = (low + high) / 2
-            low, high = (mid, high) if npv(a["discount_rate"], site24_cash_flows(mid, c.rent, c.build_cost, econ, a)[0]) < 0 else (low, mid)
+            low, high = (mid, high) if npv(a["discount_rate"], site28_cash_flows(mid, c.rent, c.build_cost, econ, a)[0]) < 0 else (low, mid)
         results.append(dict(candidate=c.candidate, region=c.region, traffic=int(c.traffic), competitors=int(c.competitors),
                             income=int(c.income), rent=float(c.rent), build_cost=float(c.build_cost),
                             cars_expected=expected, cars_typical_miss=miss, breakeven_cars=high, cases=cases))

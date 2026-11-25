@@ -1,4 +1,4 @@
-# Finance pack for a 23-site car wash chain
+# Finance pack for a 27-site car wash chain
 
 The work a financial analyst does for a multi-site business, end to end: which sites earn their keep, why profit
 missed the budget, what a member is worth, what next year looks like, and where to build the next site.
@@ -9,40 +9,41 @@ missed the budget, what a member is worth, what next year looks like, and where 
 **[Open the interactive dashboard](https://aopejf.github.io/ml-from-scratch/finance/)** &nbsp;|&nbsp;
 **[Read the one-page memo](MEMO.md)** &nbsp;|&nbsp; **[Download the Excel model](car_wash_finance_model.xlsx)**
 
-![Scorecard, profit bridge, retention curve and the site 24 comparison](result.png)
+![Scorecard, profit bridge, retention curve and the site 28 comparison](result.png)
 
 ## What it found
 
-The chain made $35.1m of revenue in 2025 and $12.7m of site profit (36%), $864k below budget.
+The chain made $43.8m of revenue in 2025 and $16.8m of site profit (38%), $1.11m below budget.
 
 **1. Site scorecard.** Every planted problem was found, with a dollar figure on the ones that can be fixed:
 
 | Site | Finding | Worth |
 |---|---|---|
-| 07 | Labour is 25% of revenue; sites of its volume run near 19% | About $120k a year |
-| 14 | Chemical cost per car jumped by half in June 2025 | About $37k a year |
-| 11 | Members cancelling at 1.5 times the chain's rate since a competitor opened | Missed budget by $189k |
-| 18 | Has lost money three years running | |
-| 22, 23 | Flagged as "still filling up", not as failing: they opened in the last two years | |
+| 07 | Labour is 28% of revenue; a site of its volume should need about 21% | About $120k a year |
+| 14 | Chemical cost per car jumped by half in June 2025 | About $32k a year |
+| 11 | Members cancelling at 1.5 times the chain's rate since a competitor opened | Missed budget by $170k |
+| 18 | Lost money in 2023 and 2024, and only broke even in 2025 | |
+| 26, 27 | Flagged as "still filling up", not as failing: they opened in the last two years | |
 
-**2. Budget against actual.** The $864k miss splits into pieces that add up exactly: fewer members than planned
-(-$637k), fewer retail cars (-$623k), the price rise arriving two months late (-$222k), and costs under budget (+$594k).
+**2. Budget against actual.** The $1.11m miss splits into pieces that add up exactly: fewer members than planned
+(-$683k), fewer retail cars (-$427k), the price rise arriving two months late (-$286k), a slightly higher retail
+price (+$8k), and costs under budget (+$274k).
 
-**3. Membership.** 61,339 members paying $30.81 a month: $1.89m of recurring revenue each month, 62% of all revenue.
-3.1% cancel each month, and 58% of new members are still there a year later. A new member is worth about $771
-and costs about $54 in marketing to win.
+**3. Membership.** 76,070 members paying $31.02 a month: $2.36m of recurring revenue each month, 62% of all revenue.
+3.0% cancel each month, and 58% of new members are still there a year later. A new member is worth about $770
+and costs about $52 in marketing to win.
 
-**4. Forecast.** 2026 revenue of $36.7m, up 4.4%. Tested on a year it had not seen, monthly car counts were off by
-4.8%, against 5.7% for the simple rule "same as this month last year".
+**4. Forecast.** 2026 revenue of $45.8m, up 4.6%. Tested on a year it had not seen, monthly car counts were off by
+4.3%, against 5.7% for the simple rule "same as this month last year".
 
-**5. Site 24.** Build at location B. It creates $1.5m of value at a 15% yearly return, and still clears the 10%
-bar if volume comes in low. Location A has the most traffic but three competitors, and falls short.
+**5. Site 28.** Build at location B. It creates $1.6m of value at a 15% yearly return, and still clears the 10%
+bar if volume comes in low. Location A has the most traffic but three competitors: it passes only narrowly and fails if volume is low.
 
 ## The three things to open
 
 | | What it is | Why it is there |
 |---|---|---|
-| [Dashboard](https://aopejf.github.io/ml-from-scratch/finance/) | One page: click any site for its history, switch the budget bridge to one site, move sliders to test the site 24 decision | For people who will not open a spreadsheet |
+| [Dashboard](https://aopejf.github.io/ml-from-scratch/finance/) | One page: click any site for its history, switch the budget bridge to one site, move sliders to test the site 28 decision | For people who will not open a spreadsheet |
 | [`car_wash_finance_model.xlsx`](car_wash_finance_model.xlsx) | The same work in Excel with live formulas. Blue cells are assumptions: change one and the answer moves | Finance teams work in Excel |
 | [`MEMO.md`](MEMO.md) | One page to the CFO: the recommendation, the reasons, and what I am less sure of | The point of analysis is a decision |
 
@@ -73,7 +74,7 @@ bar if volume comes in low. Location A has the most traffic but three competitor
    month's joiners.
 4. **Forecast** (`finance.forecast`). Built from parts: members next month = members now - cancellations + joins;
    retail cars = the site's recent level x the usual seasonal pattern. `finance.backtest` hides 2025 and scores it.
-5. **Site 24** (`finance.site24`). A regression on the 20 established sites predicts yearly washes from traffic,
+5. **Site 28** (`finance.site28`). A regression on the 24 established sites predicts yearly washes from traffic,
    competitors and income. That volume goes through ten years of cash flows (a slow first two years, 2% yearly
    growth, equipment replacement, a sale value), discounted at 10%. Low and high cases come from how far off the
    volume prediction usually is.
@@ -82,10 +83,10 @@ bar if volume comes in low. Location A has the most traffic but three competitor
 
 - **Tests.** `tests/test_finance.py`: NPV, IRR and payback against known answers; the budget bridge adds up; the
   planted problems are found; the forecast cannot see the year it is tested on.
-- **Excel against Python.** `check_excel.ps1` opens the workbook in Excel, switches through all nine site 24 cases
+- **Excel against Python.** `check_excel.ps1` opens the workbook in Excel, switches through all nine site 28 cases
   and compares 45 values with the Python results. All agree.
-- **JavaScript against Python.** The dashboard sliders redo the investment sums in the browser (`site24.js`).
-  `tests/check_site24.js` confirms they match Python.
+- **JavaScript against Python.** The dashboard sliders redo the investment sums in the browser (`site28.js`).
+  `tests/check_site28.js` confirms they match Python.
 
 ## SQL
 
@@ -120,7 +121,7 @@ To open the dashboard on your own computer, open `dashboard.html` in a browser a
 - `finance.py`: every calculation, as plain functions.
 - `analysis.py`: runs them, prints the findings, writes `results.json`, `data.js` and `result.png`.
 - `build_excel.py`, `check_excel.ps1`: write the Excel model and check it in Excel.
-- `dashboard.html`, `site24.js`: the interactive page.
+- `dashboard.html`, `site28.js`: the interactive page.
 - `queries.sql`, `run_queries.py`, `queries_output.md`: the SQL.
 - `MEMO.md`: the one-page recommendation.
 
@@ -128,12 +129,12 @@ To open the dashboard on your own computer, open `dashboard.html` in a browser a
 
 - The data is made up, so this shows the method, not facts about any real chain. Real books are messier: late
   invoices, sites that are owned instead of leased, one-off items. The planted problems are also cleaner than real ones.
-- The site 24 volume model fits very well (it explains 93% of the differences between sites) because I wrote the rule
+- The site 28 volume model fits very well (it explains 92% of the differences between sites) because I wrote the rule
   that generated the data. On real sites expect a much looser fit and wider low and high cases.
-- About a third of site 24's cash value is the assumed sale value after ten years. With no sale value, location B
-  falls $0.5m short of the 10% bar. The memo says so.
+- About a third of site 28's cash value is the assumed sale value after ten years. With no sale value, location B
+  falls $0.4m short of the 10% bar. The memo says so.
 - A new site taking customers from nearby sites of the same chain is not modelled.
-- Costs in the budget comparison are not adjusted for volume: part of the $594k "saving" is only because fewer cars were washed.
+- Costs in the budget comparison are not adjusted for volume: part of the $274k "saving" is only because fewer cars were washed.
 - The forecast beats the simple rule by a small margin, and weather it cannot know moves a month by several percent.
 - CAC counts all marketing as the cost of winning members and ignores opening discounts, so 14 to 1 is flattering.
 - Tax, loans and depreciation are left out throughout.

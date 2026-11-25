@@ -36,7 +36,7 @@ var = f.variance(data, YEAR)
 var_by_site = {int(s): f.variance(data, YEAR, site_id=s) for s in data["sites"].site_id}
 fc = f.forecast(data)
 test = f.backtest(data)
-s24 = f.site24(data)
+s24 = f.site28(data)
 
 by_year = m.groupby("year").agg(revenue=("revenue", "sum"), profit=("profit", "sum"), cars=("cars", "sum"))
 overhead = data["corporate"].assign(year=data["corporate"].month.str[:4].astype(int)).groupby("year").overhead.sum()
@@ -76,7 +76,7 @@ results = dict(
                   members=fc_month.members.round().tolist(),
                   by_site={int(k): dict(revenue=float(v.revenue), cars=float(v.cars)) for k, v in fc_site.iterrows()},
                   backtest=test),
-    site24=s24,
+    site28=s24,
 )
 text = json.dumps(results, indent=1, default=float)
 (here / "results.json").write_text(text, encoding="utf-8")
@@ -110,7 +110,7 @@ print(f"\n4. FORECAST\n   Tested on 2025 using only 2023-24, on {test['sites_tes
       f"{test['monthly_miss_model']:.1%} on average.\n   The simple rule 'same as this month last year' was off by {test['monthly_miss_same_month_last_year']:.1%}.")
 print(f"   2026 forecast: revenue ${fc.revenue.sum() / 1e6:.1f}m ({fc.revenue.sum() / y['revenue'] - 1:+.1%}), {fc.cars.sum() / 1e6:.2f}m cars.")
 
-print(f"\n5. SITE 24\n   Volume model from {s24['model']['sites_used']} established sites: each extra 1,000 cars of daily traffic adds "
+print(f"\n5. SITE 28\n   Volume model from {s24['model']['sites_used']} established sites: each extra 1,000 cars of daily traffic adds "
       f"{s24['model']['per_1000_traffic']:,.0f} washes a year,\n   each nearby competitor takes away {-s24['model']['per_competitor']:,.0f}.")
 print(f"   {'Candidate':20s}{'Cars/yr':>9s}{'NPV low':>11s}{'NPV expected':>14s}{'NPV high':>11s}{'IRR':>7s}{'Payback':>9s}")
 for c in s24["candidates"]:
@@ -127,7 +127,7 @@ BLUE, ORANGE, GREY, GOOD, BAD = "#2a78d6", "#eb6834", "#c3c2b7", "#008300", "#d0
 plt.rcParams.update({"font.family": "Segoe UI", "font.size": 10, "axes.edgecolor": GRID, "axes.labelcolor": SOFT,
                      "xtick.color": SOFT, "ytick.color": SOFT, "axes.titleweight": "bold", "axes.titlesize": 11,
                      "axes.titlelocation": "left", "axes.spines.top": False, "axes.spines.right": False})
-fig, axes = plt.subplots(2, 2, figsize=(14, 9.5))
+fig, axes = plt.subplots(2, 2, figsize=(14, 10.5))
 
 ax = axes[0, 0]
 c = card.iloc[::-1]
@@ -157,8 +157,9 @@ for i, (name, value) in enumerate(steps):
     ax.text(i, label_y / 1e6 + 0.03, f"{value / 1e6:.2f}" if name in ("Budget", "Actual") else f"{value / 1e3:+,.0f}k",
             ha="center", fontsize=8, color=INK)
 ax.set_xticks(range(len(steps)), [n for n, _ in steps], rotation=40, ha="right", fontsize=8.5)
-ax.set_ylim(11.8, 14.2)
-ax.set_ylabel("Site profit, $ millions (axis starts at 11.8)")
+floor = round(min(var["budget_profit"], var["actual_profit"]) / 1e6 - 0.9, 1)
+ax.set_ylim(floor, max(var["budget_profit"], var["actual_profit"]) / 1e6 + 0.3)
+ax.set_ylabel(f"Site profit, $ millions (axis starts at {floor})")
 ax.set_title("2. Why 2025 profit missed the budget")
 
 ax = axes[1, 0]
@@ -186,9 +187,9 @@ ax.set_ylim(-0.6, 2.6)
 ax.invert_yaxis()
 ax.set_xlabel("Value created over 10 years, $ millions (NPV). Dot: expected. Bar: low to high case.")
 ax.grid(axis="x", color=GRID, lw=0.8)
-ax.set_title("4. Site 24: three locations compared")
+ax.set_title("4. Site 28: three locations compared")
 
-fig.suptitle("A made-up 23-site car wash chain: the finance pack", x=0.01, ha="left", fontsize=14, fontweight="bold")
+fig.suptitle("A made-up 27-site car wash chain: the finance pack", x=0.01, ha="left", fontsize=14, fontweight="bold")
 fig.tight_layout(rect=(0, 0, 1, 0.97))
 fig.savefig(here / "result.png", dpi=130)
 
@@ -196,6 +197,6 @@ fig.savefig(here / "result.png", dpi=130)
 site = here.parent / "docs" / "finance"
 site.mkdir(parents=True, exist_ok=True)
 shutil.copy(here / "dashboard.html", site / "index.html")
-for name in ("data.js", "site24.js"):
+for name in ("data.js", "site28.js"):
     shutil.copy(here / name, site / name)
 print("\nSaved results.json, data.js and result.png, and copied the dashboard to docs/finance")

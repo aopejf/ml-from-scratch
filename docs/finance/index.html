@@ -6,7 +6,7 @@
 <title>Car wash chain finance pack</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.3/plotly.min.js"></script>
 <script src="data.js"></script>
-<script src="site24.js"></script>
+<script src="site28.js"></script>
 <style>
   :root { --bg:#f9f9f7; --card:#fcfcfb; --ink:#0b0b0b; --soft:#52514e; --muted:#898781; --line:#e1e0d9; --axis:#c3c2b7;
     --blue:#2a78d6; --orange:#eb6834; --grey:#c3c2b7; --good:#008300; --bad:#d03b3b; --goodtext:#006300; --wash:rgba(42,120,214,.10); }
@@ -36,8 +36,8 @@
   .tile .label { color:var(--soft); font-size:13px; }
   .tile .value { font-size:26px; font-weight:650; line-height:1.2; margin-top:2px; }
   .tile .detail { color:var(--soft); font-size:13px; }
-  .plot { height:340px; } .plot.tall { height:560px; }
-  .tablewrap { overflow:auto; max-height:560px; }
+  .plot { height:340px; } .plot.tall { height:640px; }
+  .tablewrap { overflow:auto; max-height:640px; }
   table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; font-size:14px; }
   th, td { padding:7px 9px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap; }
   th:first-child, td:first-child { text-align:left; font-weight:600; }
@@ -61,11 +61,11 @@
 </head>
 <body>
 <main>
-  <h1>Finance pack for a 23-site car wash chain</h1>
-  <p class="sub">Which sites earn their keep, why profit missed the budget, what a member is worth, what next year looks like, and where to build site 24.</p>
+  <h1>Finance pack for a 27-site car wash chain</h1>
+  <p class="sub">Which sites earn their keep, why profit missed the budget, what a member is worth, what next year looks like, and where to build site 28.</p>
   <span class="madeup">All data on this page is made up. No real company, site or customer.</span>
   <nav aria-label="Sections">
-    <a href="#scorecard">1. Site scorecard</a><a href="#budget">2. Budget against actual</a><a href="#members">3. Membership</a><a href="#forecast">4. Forecast</a><a href="#site24">5. Site 24</a>
+    <a href="#scorecard">1. Site scorecard</a><a href="#budget">2. Budget against actual</a><a href="#members">3. Membership</a><a href="#forecast">4. Forecast</a><a href="#site28">5. Site 28</a>
   </nav>
 
   <div class="tiles" id="tiles"></div>
@@ -106,8 +106,8 @@
   <p class="lead" id="forecastLead"></p>
   <div class="grid"><section class="card w12"><h3>Monthly revenue: three years of actuals, then the 2026 forecast</h3><div id="forecastChart" class="plot"></div></section></div>
 
-  <h2 id="site24">5. Where should site 24 go?</h2>
-  <p class="lead">Volume for each location is predicted from traffic, competitors and local income, using what the 20 established sites actually do. Move the sliders to test the decision.</p>
+  <h2 id="site28">5. Where should site 28 go?</h2>
+  <p class="lead">Volume for each location is predicted from traffic, competitors and local income, using what the 24 established sites actually do. Move the sliders to test the decision.</p>
   <div class="grid">
     <section class="card w12">
       <div class="controls">
@@ -287,16 +287,16 @@ function forecast() {
                      { x: D.chain.months[18], y: D.chain.revenue[18], text: "Actual", showarrow: false, yshift: 18, font: { color: css("--soft") } }] });
 }
 
-// ---------- 5. Site 24 ----------
-const A0 = D.site24.assumptions;
+// ---------- 5. Site 28 ----------
+const A0 = D.site28.assumptions;
 function resetSliders() { $("sRate").value = A0.discount_rate * 100; $("sExit").value = A0.exit_multiple; $("sVol").value = 0; $("sCost").value = 0; }
-function site24Section() {
+function site28Section() {
   const a = Object.assign({}, A0, { discount_rate: +$("sRate").value / 100, exit_multiple: +$("sExit").value });
-  const vol = 1 + +$("sVol").value / 100, cost = 1 + +$("sCost").value / 100, econ = D.site24.economics;
+  const vol = 1 + +$("sVol").value / 100, cost = 1 + +$("sCost").value / 100, econ = D.site28.economics;
   $("vRate").textContent = (+$("sRate").value).toFixed(1) + "% a year"; $("vExit").textContent = (+$("sExit").value).toFixed(1) + " times";
   $("vVol").textContent = (+$("sVol").value >= 0 ? "+" : "") + $("sVol").value + "%"; $("vCost").textContent = (+$("sCost").value >= 0 ? "+" : "") + $("sCost").value + "%";
-  const rows = D.site24.candidates.map(c => {
-    const run = cars => site24(cars * vol, c.rent, c.build_cost * cost, econ, a);
+  const rows = D.site28.candidates.map(c => {
+    const run = cars => site28(cars * vol, c.rent, c.build_cost * cost, econ, a);
     return { c, mid: run(c.cars_expected), low: run(c.cars_expected - 1.3 * c.cars_typical_miss), high: run(c.cars_expected + 1.3 * c.cars_typical_miss) };
   });
   const cls = v => v >= 0 ? "pos" : "neg";
@@ -320,16 +320,16 @@ function site24Section() {
 }
 function breakeven(c, cost, econ, a) {
   let low = 0, high = 400000;
-  for (let i = 0; i < 60; i++) { const mid = (low + high) / 2; if (site24(mid, c.rent, c.build_cost * cost, econ, a).npv < 0) low = mid; else high = mid; }
+  for (let i = 0; i < 60; i++) { const mid = (low + high) / 2; if (site28(mid, c.rent, c.build_cost * cost, econ, a).npv < 0) low = mid; else high = mid; }
   return high;
 }
-["sRate", "sExit", "sVol", "sCost"].forEach(id => $(id).addEventListener("input", site24Section));
-$("reset").addEventListener("click", () => { resetSliders(); site24Section(); });
+["sRate", "sExit", "sVol", "sCost"].forEach(id => $(id).addEventListener("input", site28Section));
+$("reset").addEventListener("click", () => { resetSliders(); site28Section(); });
 
 // ---------- Start ----------
 $("bridgeSite").innerHTML = `<option value="all">Whole chain</option>` + D.scorecard.slice().sort((a, b) => a.site_id - b.site_id).map(r => `<option value="${r.site_id}">${r.name}</option>`).join("");
 $("bridgeSite").addEventListener("change", bridge);
-function everything() { tiles(); pick(picked, true); bridge(); members(); forecast(); site24Section(); }
+function everything() { tiles(); pick(picked, true); bridge(); members(); forecast(); site28Section(); }
 resetSliders();
 if (window.Plotly) { $("metric").value = "labour_share"; everything(); pick(picked); }
 else document.querySelector(".madeup").insertAdjacentHTML("afterend", '<p role="alert" class="neg">The chart library did not load. Check your internet connection and reload.</p>');

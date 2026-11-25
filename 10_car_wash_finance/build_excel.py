@@ -9,10 +9,10 @@ the answer move. check_excel.ps1 opens it in Excel and compares its answers with
 
 Sheets:
     Read me            what is in the workbook
-    Site 24            the investment model: pick a location and a case, change any assumption
+    Site 28            the investment model: pick a location and a case, change any assumption
     Scorecard          one row per site, built with SUMIFS over the monthly data
     Budget vs actual   every line of the 2025 budget against what happened, for the chain or one site
-    Monthly data       36 months for 23 sites
+    Monthly data       36 months for 27 sites
     Budget             the 2025 budget
 """
 
@@ -28,7 +28,7 @@ here = Path(__file__).parent
 results = json.loads((here / "results.json").read_text(encoding="utf-8"))
 monthly = pd.read_csv(here / "data" / "monthly.csv")
 budget = pd.read_csv(here / "data" / "budget.csv")
-s24 = results["site24"]
+s24 = results["site28"]
 
 book = xlsxwriter.Workbook(here / "car_wash_finance_model.xlsx")
 title = book.add_format({"bold": True, "font_size": 14})
@@ -52,7 +52,7 @@ big = book.add_format({"num_format": "#,##0;[Red]-#,##0", "bold": True, "font_si
 big_pct = book.add_format({"num_format": "0.0%", "bold": True, "font_size": 12})
 
 readme = book.add_worksheet("Read me")
-s24_sheet = book.add_worksheet("Site 24")
+s24_sheet = book.add_worksheet("Site 28")
 score = book.add_worksheet("Scorecard")
 bva = book.add_worksheet("Budget vs actual")
 data_sheet = book.add_worksheet("Monthly data")
@@ -98,8 +98,9 @@ heads = ["Site", "Revenue", "Costs", "Profit", "Margin", "Cars washed", "Revenue
          "Chemicals per car", "Members at year end", "Cancel rate per month"]
 score.write_row(3, 0, heads, head)
 score.set_row(3, 32)
-first, last = 5, 4 + 23
-for i in range(23):
+N = len(results["scorecard"])
+first, last = 5, 4 + N
+for i in range(N):
     r = 4 + i
     x = r + 1
     score.write_number(r, 0, i + 1)
@@ -136,7 +137,7 @@ score.freeze_panes(4, 1)
 bva.write("A1", "2025 budget against actual", title)
 bva.write("A2", "Site")
 bva.write("B2", "All", in_text)
-bva.data_validation("B2", {"validate": "list", "source": ["All"] + list(range(1, 24))})
+bva.data_validation("B2", {"validate": "list", "source": ["All"] + list(range(1, N + 1))})
 bva.write("C2", 'Pick "All" for the chain or a site number.', note)
 bva.write_row(3, 0, ["Line", "Budget", "Actual", "Difference", "Difference %", "Good or bad for profit"], head)
 lines = [("Membership revenue", "membership_revenue", 1), ("Retail revenue", "retail_revenue", 1)] + [(c.replace("_", " ").capitalize(), c, -1) for c in f.COSTS]
@@ -187,11 +188,11 @@ bva.set_column(0, 0, 42)
 bva.set_column(1, 5, 16)
 
 # ---------------------------------------------------------------------------
-# Site 24
+# Site 28
 # ---------------------------------------------------------------------------
 w = s24_sheet
 a, econ, model = s24["assumptions"], s24["economics"], s24["model"]
-w.write("A1", "Where should site 24 go?", title)
+w.write("A1", "Where should site 28 go?", title)
 w.write("A2", "Blue cells are assumptions. Change any of them and the answer updates.", note)
 
 w.write("A4", "Location", bold)
@@ -226,7 +227,7 @@ for i, (label, value, fmt) in enumerate(econ_rows):
     w.write_number(18 + i, 1, value, fmt)
 REV_CAR, COST_CAR, FIXED, CARD = [f"$B${19 + i}" for i in range(4)]
 
-w.write("A24", "Volume model: washes a year, learned from 20 established sites", bold)
+w.write("A24", "Volume model: washes a year, learned from " + str(model["sites_used"]) + " established sites", bold)
 coef_rows = [("Starting point", model["intercept"]), ("For each 1,000 cars passing a day", model["per_1000_traffic"]),
              ("For each competitor within 3 miles", model["per_competitor"]), ("For each $1,000 of local household income", model["per_1000_income"])]
 for i, (label, value) in enumerate(coef_rows):
@@ -325,10 +326,10 @@ w.set_column(4, 14, 14)
 # ---------------------------------------------------------------------------
 readme.set_column(0, 0, 110)
 text = [
-    ("Finance model for a 23-site car wash chain", title),
+    ("Finance model for a 27-site car wash chain", title),
     ("ALL DATA IN THIS WORKBOOK IS MADE UP. No real company, site or customer.", bold),
     ("", None),
-    ("Site 24: the investment model. Pick a location and a volume case, change any blue cell, and the NPV, IRR and payback update.", wrap),
+    ("Site 28: the investment model. Pick a location and a volume case, change any blue cell, and the NPV, IRR and payback update.", wrap),
     ("Scorecard: one row per site. Every number is a SUMIFS over the Monthly data sheet. Change the year in B2.", wrap),
     ("Budget vs actual: each line of the 2025 budget against what happened, for the whole chain or one site, and why revenue moved.", wrap),
     ("Monthly data, Budget: the raw numbers the other sheets add up.", wrap),
