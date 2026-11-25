@@ -3,10 +3,11 @@
 [![tests](https://github.com/aopejf/ml-from-scratch/actions/workflows/tests.yml/badge.svg)](https://github.com/aopejf/ml-from-scratch/actions/workflows/tests.yml)
 
 Ten projects that build machine learning up from a single neuron to a language model you can type into,
-with the core parts written by hand instead of called from a library, plus two applied finance projects. Every result below is measured, and
+with the core parts written by hand instead of called from a library, plus four finance projects, two of which run on
+those hand-built parts. Every result below is measured, and
 every project says what it cannot do.
 
-## Start with these five
+## Start with these seven
 
 ### 1. A GPT that writes stories, built end to end ([`5_story_gpt`](5_story_gpt))
 
@@ -66,7 +67,39 @@ share price to what buyers must be assuming. A method, not advice.
 - The model's answer is about a quarter of the share price, and the page shows exactly which assumptions would close the gap.
 - A company growing at one steady rate gets the textbook answer to twelve decimal places; Python, Excel and JavaScript agree.
 
-## All twelve
+### 6. Who will miss their next payment? ([`12_loan_default`](12_loan_default))
+
+![Model comparison, calibration, the profit curve and the recession detector](12_loan_default/result.png)
+
+I trained a model on 30,000 real credit card customers to predict who will miss their next payment. It learns on
+the autograd engine from project 2 and the Adam optimizer from project 1, with no machine-learning library. A
+second model spots recessions without being told what one is, and tells the first when to lend more strictly.
+
+[Open the interactive page](https://aopejf.github.io/ml-from-scratch/loans/)
+
+- It ranks a defaulter above a good customer 77 times in 100 (AUC 0.768), within half a point of scikit-learn's
+  strongest model.
+- Lending to everyone lost NT$10.0m. Lending only below the break-even risk made NT$11.5m.
+- The recession model found all 11 US recessions since 1953. In a recession the usual rule is expected to lose
+  money, and the stricter one is expected to make NT$5.1m.
+
+### 7. What is an option worth? ([`13_options_pricer`](13_options_pricer))
+
+![The option's value, three pricing methods, three-month outcomes and the volatility smile](13_options_pricer/result.png)
+
+I priced options three ways and tested the famous formula against what people really pay. The autograd engine
+from project 2 works out the Greeks, so I never typed in a Greek formula. The diffusion model from project 4,
+which used to draw digits, makes up futures for the stock market to price options on.
+
+[Open the interactive pricer](https://aopejf.github.io/ml-from-scratch/options/)
+
+- The engine's Greeks match the textbook formulas to 15 decimal places on 1,000 random options.
+- People pay 2.3 times what the formula says for crash protection. Futures from the diffusion model account for
+  about 32% of that tilt in the market's prices. Bell-curve futures account for none of it.
+- When the standard solver for implied volatility fails, project 1's Adam takes over. 542 of 1,000 awkward
+  options needed it, and it solved every one.
+
+## All fourteen
 
 | # | Folder | Official name | What it does | Result |
 |---|--------|---------------|--------------|--------|
@@ -82,8 +115,11 @@ share price to what buyers must be assuming. A method, not advice.
 | 9 | [`9_neural_net_numpy`](9_neural_net_numpy) | Multilayer perceptron, loss landscape (PCA) | A neural net in pure NumPy, with a map of the path training took | 100% on new points; hand-written gradients correct to 1e-10 |
 | 10 | [`10_car_wash_finance`](10_car_wash_finance) | Unit economics, variance analysis, NPV and IRR | A finance pack for a made-up 27-site chain: scorecard, budget bridge, forecast, investment decision | Finds every planted problem; Excel, Python and JavaScript agree |
 | 11 | [`11_company_valuation`](11_company_valuation) | Discounted cash flow (DCF), WACC, reverse DCF | Values a real company from its filed accounts and shows what its share price assumes | $293 a share against a price of $1,098; the price needs 42% growth or an 11.5% margin |
+| 12 | [`12_loan_default`](12_loan_default) | Credit scoring (PD, expected loss), hidden Markov model, stress test | Scores real credit card customers on the hand-built engine, and tightens lending when an unsupervised model detects a recession | AUC 0.768 against 0.772 for gradient boosting; all 11 recessions found; the fallback rule turns a loss into NT$5.1m |
+| 13 | [`13_options_pricer`](13_options_pricer) | Black-Scholes, the Greeks, binomial tree, Monte Carlo, implied volatility | Prices options three ways, gets the Greeks from the autograd engine, and prices on futures made by the diffusion model | Greeks correct to 1e-15; diffusion futures explain 32% of the market's volatility smile |
 
 Projects 0 to 6 are in order because each one uses the ideas from the ones before. Projects 7 to 11 stand alone.
+Projects 12 and 13 put the parts built in projects 1, 2 and 4 to work.
 
 ## The one idea behind all of them
 
@@ -102,20 +138,22 @@ Every model here learns the same way:
 - **Projects 3 and 4** use the same loop on bigger models, with PyTorch doing the jobs projects 1 and 2 did by hand.
 - **Project 5** takes project 3's model and makes it useful: a real tokenizer, 400 times more text, a demo.
 - **Project 6** applies project 0's model, and a stronger one, to a business decision.
+- **Project 12** trains a lending model on project 2's engine with project 1's Adam, and uses the engine again to explain each score.
+- **Project 13** writes an option formula with project 2's engine to get its Greeks, falls back on project 1's Adam when a solver fails, and prices on market futures made by project 4's diffusion recipe.
 
 ## Setup
 
 Python 3.12 with:
 
 ```powershell
-python -m pip install numpy matplotlib scikit-learn pandas yfinance xlsxwriter
+python -m pip install numpy matplotlib scikit-learn pandas yfinance xlsxwriter xlrd
 ```
 
 ```powershell
 python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 ```
 
-PyTorch is only needed for projects 3, 4 and 5. Each project's README says how to run it.
+PyTorch is only needed for projects 3, 4 and 5, and for the market scenarios in project 13. Each project's README says how to run it.
 Everything here was trained on a laptop processor, with no graphics card.
 
 ## Tests
@@ -124,8 +162,8 @@ Everything here was trained on a laptop processor, with no graphics card.
 python -m pytest
 ```
 
-33 automatic checks in [`tests`](tests), plus three that compare JavaScript code with its Python original, run on every change (the badge at the top). They test claims the projects
+98 automatic checks in [`tests`](tests), plus five that compare JavaScript code with its Python original, run on every change (the badge at the top). They test claims the projects
 depend on: that backpropagation gives the right gradients, that the GPT cannot see words ahead of the one it is
 predicting, that the tokenizer gives back exactly the text that went in, that the portfolio numbers are right
-on prices with known answers, that the finance pack's budget bridge adds up to the cent, and that the valuation gives the textbook answer for a company
-with a known value.
+on prices with known answers, that the finance pack's budget bridge adds up to the cent, that the valuation gives the textbook answer for a company
+with a known value, that the loan model's reasons add up to its score, and that the option Greeks from the engine match the textbook.

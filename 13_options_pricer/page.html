@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>What is an option worth?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.3/plotly.min.js"></script>
+<script src="data.js"></script>
+<script src="pricer.js"></script>
+<style>
+  /* Colours follow the habit of financial models: blue is an input you may change, black is worked out, red is a loss. */
+  :root { --paper:#ffffff; --ink:#000000; --quiet:#5a5a5a; --rule:#000000; --hair:#d9d9d9; --input:#0b35d6; --model:#0b7a53; --flat:#8c8c8c; --loss:#c00000;
+    --serif:"Source Serif 4", Georgia, "Times New Roman", serif; --sans:"Source Sans 3", "Segoe UI", Arial, sans-serif; }
+  * { box-sizing:border-box; }
+  html { color-scheme:light; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:18px/1.62 var(--serif); }
+  main { max-width:60rem; margin:0 auto; padding:3.5rem 1.25rem 5rem; }
+  main > p, main > h1, main > h2, main > .sentence, main > .answer, main > .dial, main > small { max-width:41rem; }
+  h1 { font-size:clamp(2.1rem, 6vw, 3.25rem); line-height:1.08; font-weight:600; letter-spacing:-0.015em; margin:0 0 1.5rem; }
+  h2 { font-size:1.55rem; line-height:1.2; font-weight:600; margin:4rem 0 0.8rem; }
+  p { margin:0 0 1.05rem; }
+  a { color:inherit; text-underline-offset:3px; }
+  .key { font:400 0.9rem/1.45 var(--sans); color:var(--quiet); margin:0 0 2.5rem; }
+  .key b, .in { color:var(--input); }
+
+  .sentence { font-size:clamp(1.3rem, 3.6vw, 1.7rem); line-height:1.75; margin:0 0 0.4rem; }
+  .sentence input, .sentence select { font:inherit; font-weight:600; color:var(--input); background:none; border:0; border-bottom:2px dotted var(--input); border-radius:0;
+    padding:0 1px; margin:0; text-align:center; font-variant-numeric:tabular-nums lining-nums; -moz-appearance:textfield; appearance:textfield; }
+  .sentence select { appearance:auto; text-align:left; cursor:pointer; padding-right:0; }
+  .sentence input::-webkit-outer-spin-button, .sentence input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+  .sentence input.on { border-bottom-style:solid; background:#eef2ff; }
+  .sentence .in { font-weight:600; }
+  .glue { white-space:nowrap; }
+  .answer { font-size:clamp(1.3rem, 3.6vw, 1.7rem); line-height:1.4; margin:0 0 1.4rem; }
+  .answer output { font-weight:600; font-size:1.9em; letter-spacing:-0.01em; font-variant-numeric:tabular-nums lining-nums; }
+  .dial { display:grid; grid-template-columns:1fr auto; gap:0.1rem 1rem; align-items:center; font:400 0.95rem/1.4 var(--sans); color:var(--quiet); margin:0 0 2rem; }
+  .dial input { grid-column:1; width:100%; accent-color:var(--input); margin:0; height:28px; }
+  .dial label { grid-column:1 / -1; }
+  button { font:400 0.95rem/1.4 var(--sans); color:var(--ink); background:none; border:0; padding:4px 0; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+  :focus-visible { outline:2px solid var(--input); outline-offset:3px; }
+
+  figure { margin:2rem 0 2.4rem; }
+  figcaption { font:400 0.95rem/1.5 var(--sans); color:var(--quiet); max-width:41rem; margin-top:0.5rem; }
+  figcaption i { display:inline-block; width:22px; height:0; border-top:3px solid; vertical-align:4px; margin-right:5px; }
+  figcaption i.dash { border-top-style:dashed; }
+  .plot { height:340px; }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:0 2.5rem; }
+  .pair figure { min-width:0; }
+  @media (max-width: 760px) { .pair { grid-template-columns:1fr; } .plot { height:290px; } main { padding-top:2.25rem; } }
+
+  .scroll { overflow-x:auto; margin:1.4rem 0 0.4rem; }
+  table { border-collapse:collapse; font:400 1rem/1.4 var(--sans); font-variant-numeric:tabular-nums lining-nums; border-top:2px solid var(--rule); border-bottom:2px solid var(--rule); }
+  th, td { padding:0.42rem 1.6rem 0.42rem 0; text-align:right; white-space:nowrap; }
+  th:last-child, td:last-child { padding-right:0; }
+  th:first-child, td:first-child { text-align:left; }
+  td.words { text-align:left; white-space:normal; min-width:12rem; }
+  thead th { font-weight:600; border-bottom:1px solid var(--rule); vertical-align:bottom; }
+  tbody tr.total td { border-top:1px solid var(--rule); font-weight:600; }
+  .neg { color:var(--loss); }
+  @media (max-width: 760px) { table { font-size:0.9rem; width:100%; } th, td { padding-right:0.8rem; } td.words { min-width:0; } }
+  .show { font:400 0.95rem/1.4 var(--sans); color:var(--quiet); margin:0 0 0.3rem; }
+  .show button { margin-left:0.9rem; color:var(--quiet); }
+  .show button[aria-pressed="true"] { color:var(--ink); font-weight:600; text-decoration-thickness:2px; }
+  .aside { font:400 0.95rem/1.5 var(--sans); color:var(--quiet); margin-top:0.6rem; }
+  tbody tr.mine td { font-weight:600; }
+  .people { display:grid; grid-template-columns:repeat(3, 1fr); gap:0 2.5rem; }
+  .people table { width:100%; }
+  .people td.words { min-width:0; }
+  .people h3 { font:600 1.3rem/1.3 var(--serif); margin:1.6rem 0 0.2rem; }
+  .people p { font:400 0.95rem/1.5 var(--sans); color:var(--quiet); margin:0 0 0.6rem; }
+  @media (max-width: 900px) { .people { grid-template-columns:1fr; } }
+  small { display:block; font:400 0.92rem/1.55 var(--sans); color:var(--quiet); margin-top:4rem; padding-top:1rem; border-top:1px solid var(--hair); }
+  small p { margin:0 0 0.6rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>What is an option worth?</h1>
+  <p>An option is the right to buy a share at a price agreed today, on a date in the future. You do not have to use it. That choice has a value, and working it out is one of the oldest problems in finance.</p>
+  <p>I priced it with parts I had already built in this repository for other jobs: the engine that trains my neural networks, and the model that learned to draw handwritten digits. Then I checked the answers against what people really paid on <span id="when"></span>.</p>
+  <p class="key">Numbers in <b>blue</b> are inputs, as they are in a spreadsheet model. Tap one and type, or drag the slider under the sentence.</p>
+
+  <p class="sentence">
+    A <select id="sKind" aria-label="Kind of option"><option value="call">call</option><option value="put">put</option></select>
+    on a share trading at <span class="in glue">$<input id="sPrice" type="number" inputmode="decimal" min="400" max="1000" step="1" aria-label="Share price today" data-name="the share price"></span>,
+    with a strike of <span class="in glue">$<input id="sStrike" type="number" inputmode="decimal" min="400" max="1000" step="5" aria-label="Strike" data-name="the strike"></span>
+    and <input id="sDays" type="number" inputmode="numeric" min="1" max="730" step="1" aria-label="Days to run" data-name="the days left"> days to run,
+    when the share swings <span class="in glue"><input id="sVol" type="number" inputmode="decimal" min="5" max="80" step="0.5" aria-label="Volatility, percent a year" data-name="the volatility">%</span> a year,
+    safe money earns <span class="in glue"><input id="sRate" type="number" inputmode="decimal" min="0" max="10" step="0.05" aria-label="Interest rate, percent" data-name="the interest rate">%</span>
+    and the share pays <span class="in glue"><input id="sDiv" type="number" inputmode="decimal" min="0" max="5" step="0.05" aria-label="Dividend rate, percent" data-name="the dividend">%</span> in dividends,
+  </p>
+  <p class="answer">is worth <output id="value" for="sKind sPrice sStrike sDays sVol sRate sDiv"></output> a share.</p>
+  <div class="dial"><label for="dial" id="dialLabel"></label><input id="dial" type="range"><button id="reset">Put the real numbers back</button></div>
+
+  <p id="verdict"></p>
+
+  <div class="scroll"><table id="live"></table></div>
+  <p>These five reactions are called the Greeks. Traders watch them more closely than the price, because they say what happens next.</p>
+
+  <figure>
+    <div id="curve" class="plot"></div>
+    <figcaption><i style="color:var(--ink)"></i>What the option is worth today, for every share price. <i class="dash" style="color:var(--flat)"></i>What it pays on its last day. The dot is where you are. The steepness of the black line at the dot is delta.</figcaption>
+  </figure>
+
+  <h2 id="greeks">The Greeks, without the formulas</h2>
+  <p>A textbook gets each Greek by calculus, one formula at a time. I did not write those. In <a href="https://github.com/aopejf/ml-from-scratch/tree/main/2_autograd">project 2</a> I built an engine that records every step of a sum and then works backwards through it to find how much each input mattered. It was built to train neural networks. I wrote the option formula in it once, ran it backwards, and all the Greeks came out.</p>
+  <p id="greekNote"></p>
+  <div class="scroll"><table id="greekTable"></table></div>
+
+  <h2 id="methods">Three ways to the same price</h2>
+  <p>The formula is one way. A second is to cut the time into small steps where the share goes up a little or down a little, and work back from the end. A third is to imagine a great many futures and average what the option pays. They should agree, and they do.</p>
+  <div class="pair">
+    <figure>
+      <div id="treeChart" class="plot"></div>
+      <figcaption><i style="color:var(--ink)"></i>The tree's price for one put as I give it more steps. <i class="dash" style="color:var(--flat)"></i>The formula.</figcaption>
+    </figure>
+    <div>
+      <div class="scroll"><table id="methodTable"></table></div>
+      <p id="methodNote" class="aside"></p>
+    </div>
+  </div>
+  <p>The tree earns its place on the last two rows. The formula only handles an option you must hold to the end. The tree can price one you may use early, by asking at every step whether using it now beats waiting.</p>
+
+  <h2 id="smile">Where the formula is wrong</h2>
+  <p>The formula takes one volatility for the share. So I ran it backwards on real prices: for each option trading that day, what volatility would the formula need to give the price people paid? If the formula described the world, every option would give the same answer and the black line below would be flat.</p>
+  <figure>
+    <div id="smileChart" class="plot" style="height:380px"></div>
+    <figcaption><i style="color:var(--ink)"></i>The market, from real option prices. <i style="color:var(--model)"></i>Options priced on futures from my diffusion model. <i class="dash" style="color:var(--flat)"></i>Priced on bell-curve futures, which is what the formula assumes.</figcaption>
+  </figure>
+  <p id="smileNote"></p>
+  <p id="solverNote"></p>
+
+  <h2 id="futures">Futures from a model that used to draw digits</h2>
+  <p>The formula assumes every day's move comes from the same bell curve. Markets do not move like that. Bad days are far bigger than a bell curve allows, and they come in runs.</p>
+  <p>In <a href="https://github.com/aopejf/ml-from-scratch/tree/main/4_diffusion">project 4</a> I built a diffusion model that makes handwritten digits out of static. I gave the same recipe a different picture to learn: 64 days of market moves laid out as an 8 by 8 grid, for every three-month stretch of the S&amp;P 500 since 1950. Then I asked it for new ones.</p>
+  <div class="pair">
+    <figure>
+      <p class="show">Show<button id="pReal" aria-pressed="false">real history</button><button id="pMade" aria-pressed="true">diffusion model</button><button id="pBell" aria-pressed="false">bell curve</button></p>
+      <div id="paths" class="plot"></div>
+      <figcaption>Thirty stretches of three months, each starting at 100.</figcaption>
+    </figure>
+    <figure>
+      <p class="show">&nbsp;</p>
+      <div id="endings" class="plot"></div>
+      <figcaption>Where three months end up. <i style="color:var(--ink)"></i>Real history. <i style="color:var(--model)"></i>Diffusion model. <i class="dash" style="color:var(--flat)"></i>Bell curve. The scale is stretched so the rare big moves show.</figcaption>
+    </figure>
+  </div>
+  <p id="printNote"></p>
+  <div class="scroll"><table id="prints"></table></div>
+  <p style="margin-top:1.2rem">It is not a perfect copy of the market. Its futures are calmer than history and it makes fewer of the deepest falls. I left that in the table.</p>
+
+  <small>
+    <p>This is a worked method. It is not advice to buy or sell anything, and options can lose their whole value.</p>
+    <p>Prices are one day's public quotes for options on SPY, the fund that tracks the S&amp;P 500, and the index's daily closes since 1950, both from Yahoo Finance. The interest rate is from FRED, Federal Reserve Bank of St. Louis.</p>
+    <p>The code and a longer write-up are at <a href="https://github.com/aopejf/ml-from-scratch/tree/main/13_options_pricer">github.com/aopejf/ml-from-scratch</a>.</p>
+  </small>
+</main>
+
+<script>
+const D = window.DATA, M = D.market;
+const $ = id => document.getElementById(id);
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const pct = (v, d = 1) => (v * 100).toFixed(d) + "%";
+const usd = (v, d = 2) => (v < 0 ? "-$" : "$") + Math.abs(v).toFixed(d);
+const signed = (v, d = 2) => (v < 0 ? "down " : "up ") + "$" + Math.abs(v).toFixed(d);
+const day = iso => new Date(iso + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+function layout(extra) {
+  return Object.assign({
+    margin: { l: 58, r: 8, t: 8, b: 56 }, paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: css("--sans"), size: 14, color: css("--quiet") }, showlegend: false,
+    hoverlabel: { bgcolor: "#fff", bordercolor: "#000", font: { family: css("--sans"), color: "#000" } },
+    xaxis: axis({ showgrid: false }), yaxis: axis({}),
+  }, extra);
+}
+function axis(extra) { return Object.assign({ gridcolor: css("--hair"), linecolor: "#000", zeroline: false, ticks: "outside", ticklen: 4, tickcolor: "#000", showline: true }, extra, extra.title ? { title: { text: extra.title.text, standoff: 18 } } : {}); }
+const draw = (id, traces, lay) => Plotly.react(id, traces, layout(lay), { displayModeBar: false, responsive: true });
+
+const fields = ["sPrice", "sStrike", "sDays", "sVol", "sRate", "sDiv"];
+let shown = "diffusion", active = "sVol";
+const E = D.greeks.example;
+const start = { sPrice: Math.round(E.price), sStrike: E.strike, sDays: M.days_to_expiry, sVol: E.volatility * 100, sRate: Math.round(E.rate * 2000) / 20, sDiv: Math.round(E.dividend * 2000) / 20 };
+function reset() { for (const [id, v] of Object.entries(start)) $(id).value = v; $("sKind").value = "call"; }
+
+function read(id) {  // a typed number, kept inside the range the input allows; an empty box keeps the starting value
+  const box = $(id), v = parseFloat(box.value);
+  return Number.isFinite(v) ? Math.min(+box.max, Math.max(+box.min, v)) : start[id];
+}
+function point(id) {  // aim the one slider at whichever blue number was touched last
+  active = id;
+  const box = $(id), dial = $("dial");
+  fields.forEach(f => $(f).classList.toggle("on", f === id));
+  dial.min = box.min; dial.max = box.max; dial.step = box.step; dial.value = read(id);
+  $("dialLabel").textContent = "Drag to change " + box.dataset.name;
+}
+
+function calculator() {
+  fields.forEach(id => { $(id).style.width = Math.max(String($(id).value).length, 1) + 0.25 + "ch"; });
+  const pick = $("sKind"); pick.style.width = pick.options[pick.selectedIndex].text.length * 0.47 + 1.15 + "em";  // the menu is only as wide as the word showing
+  const kind = $("sKind").value;
+  const o = { price: read("sPrice"), strike: read("sStrike"), years: read("sDays") / 365, rate: read("sRate") / 100, volatility: read("sVol") / 100, dividend: read("sDiv") / 100, kind };
+  $("dial").value = read(active);
+
+  const g = option(o), early = tree(o, 400, true), plain = tree(o, 400, false);
+  const sign = kind === "call" ? 1 : -1, now = Math.max(sign * (o.price - o.strike), 0);
+  $("value").textContent = usd(g.value);
+  $("verdict").textContent =
+    (now > 0 ? `${usd(now)} of that is what it would pay if you used it today. The rest is for what might still happen. ` : `It would pay nothing if you used it today, so the whole ${usd(g.value)} is for what might still happen. `) +
+    `To come out ahead on the last day, the share has to finish ${kind === "call" ? "above" : "below"} ${usd(o.strike + sign * g.value)}. ` +
+    `If you were allowed to use it early, that right would add ${usd(Math.max(early - plain, 0))}.`;
+
+  const row = (name, what, effect, raw) => `<tr><td>${name}</td><td class="words">${what}</td><td>${effect}</td><td>${raw}</td></tr>`;
+  $("live").innerHTML = "<thead><tr><th></th><th style='text-align:left'>If</th><th>the option goes</th><th>Greek</th></tr></thead><tbody>" +
+    row("Delta", "the share rises $1", signed(g.delta), g.delta.toFixed(3)) +
+    row("Gamma", "the share rises $1, delta itself moves", (g.gamma < 0 ? "" : "+") + g.gamma.toFixed(4), g.gamma.toFixed(4)) +
+    row("Vega", "volatility rises one point", signed(g.vega), g.vega.toFixed(3)) +
+    row("Theta", "one day passes", signed(g.theta), g.theta.toFixed(3)) +
+    row("Rho", "interest rises one point", signed(g.rho), g.rho.toFixed(3)) + "</tbody>";
+
+  const low = Math.min(o.price, o.strike) * 0.75, high = Math.max(o.price, o.strike) * 1.25;
+  const xs = Array.from({ length: 121 }, (_, i) => low + (high - low) * i / 120);
+  draw("curve", [
+    { x: xs, y: xs.map(x => Math.max(sign * (x - o.strike), 0)), mode: "lines", line: { color: css("--flat"), width: 2, dash: "dash" }, hovertemplate: "Share $%{x:.0f}: pays $%{y:.2f}<extra>Last day</extra>" },
+    { x: xs, y: xs.map(x => option({ ...o, price: x }).value), mode: "lines", line: { color: "#000", width: 2.5 }, hovertemplate: "Share $%{x:.0f}: worth $%{y:.2f}<extra>Today</extra>" },
+    { x: [o.price], y: [g.value], mode: "markers", marker: { color: css("--input"), size: 12, line: { color: "#fff", width: 2 } }, hovertemplate: "Now: $%{y:.2f}<extra></extra>" },
+  ], { xaxis: axis({ showgrid: false, tickprefix: "$", title: { text: "Share price" } }), yaxis: axis({ tickprefix: "$", rangemode: "tozero" }), hovermode: "x" });
+}
+
+function fixedCharts() {
+  $("when").textContent = day(M.price_date);
+  const T = D.greeks.table, names = ["delta", "gamma", "vega", "theta", "rho"];
+  $("greekNote").textContent = `Here they are next to the textbook's formulas, for a call and a put on SPY at $${E.strike} with ${M.days_to_expiry} days to run. ` +
+    `I also tried ${D.greeks.options_checked.toLocaleString()} random options. The biggest disagreement was ${D.greeks.worst_gap.toExponential(0)}, which is the last digit a computer keeps.`;
+  $("greekTable").innerHTML = "<thead><tr><th></th><th>Call, my engine</th><th>Call, textbook</th><th>Put, my engine</th><th>Put, textbook</th></tr></thead><tbody>" +
+    names.map(g => `<tr><td>${g[0].toUpperCase() + g.slice(1)}</td>` + ["call", "put"].map(k => `<td>${T[k][g].engine.toFixed(8)}</td><td>${T[k][g].textbook.toFixed(8)}</td>`).join("") + "</tr>").join("") + "</tbody>";
+
+  const X = D.methods;
+  draw("treeChart", [
+    { x: X.tree_curve.map(r => r.steps), y: X.tree_curve.map(r => r.value), mode: "lines+markers", line: { color: "#000", width: 2 }, marker: { size: 7, color: "#000" }, hovertemplate: "%{x} steps: $%{y:.4f}<extra></extra>" },
+  ], { xaxis: axis({ showgrid: false, type: "log", title: { text: "Steps in the tree" } }), yaxis: axis({ tickprefix: "$", tickformat: ".2f" }),
+       shapes: [{ type: "line", xref: "paper", x0: 0, x1: 1, y0: X.formula, y1: X.formula, line: { color: css("--flat"), width: 2, dash: "dash" } }] });
+  const row = (a, b, total) => `<tr${total ? ' class="total"' : ""}><td>${a}</td><td>${b}</td></tr>`;
+  $("methodTable").innerHTML = "<thead><tr><th>One put on SPY at $" + X.example.strike + "</th><th>Price</th></tr></thead><tbody>" + row("The formula", usd(X.formula, 4)) + row("A tree of 2,000 steps", usd(X.tree, 4)) +
+    row(`${X.paths_used.toLocaleString()} imagined futures`, `${usd(X.paths, 2)} ± ${X.paths_error.toFixed(2)}`) +
+    row("The tree, if you may use it early", usd(X.american_put, 4), true) + row("So going early is worth", usd(X.early_use_worth, 2)) + "</tbody>";
+  $("methodNote").textContent = `A call and a put at the same strike are tied together by a rule that leaves no free money (put-call parity). Mine obey it to ${Math.abs(X.parity_gap).toExponential(0)}.`;
+
+  const S = D.smile, I = D.implied, spot = M.fund_price, rel = a => a.map(k => k / spot);
+  draw("smileChart", [
+    { x: rel(S.diffusion.strike).concat(rel(S.diffusion.strike).reverse()), y: S.diffusion.high.concat(S.diffusion.low.slice().reverse()), fill: "toself", fillcolor: "rgba(11,122,83,.14)", line: { width: 0 }, hoverinfo: "skip" },
+    { x: rel(S.bell_curve.strike), y: S.bell_curve.volatility, mode: "lines", line: { color: css("--flat"), width: 2, dash: "dash" }, hovertemplate: "%{y:.1%}<extra>Bell curve</extra>" },
+    { x: rel(S.diffusion.strike), y: S.diffusion.volatility, mode: "lines", line: { color: css("--model"), width: 2.5 }, hovertemplate: "%{y:.1%}<extra>Diffusion</extra>" },
+    { x: rel(S.market.strike), y: S.market.volatility, mode: "lines", line: { color: "#000", width: 2.5 }, hovertemplate: "%{y:.1%}<extra>Market</extra>" },
+  ], { xaxis: axis({ showgrid: false, tickformat: ".0%", range: [0.79, 1.11], title: { text: "Strike, as a share of that day's price" } }), yaxis: axis({ tickformat: ".0%", title: { text: "Volatility the price implies" } }), hovermode: "x" });
+  $("smileNote").textContent = `It slopes. Options that pay out if the market falls 10% imply ${pct(I.down_10)} volatility. At the day's price it is ${pct(I.atm)}, and 5% above it is ${pct(I.up_5)}. ` +
+    `In money: a put at $${I.crash.strike} cost ${usd(I.crash.market)}. The formula, fed the volatility from the middle, says ${usd(I.crash.flat)}. People paid ${I.crash.times.toFixed(1)} times the formula's price to be covered against a crash. ` +
+    `Priced on my diffusion model's futures the same put comes to ${usd(S.crash_model)}, and the line tilts the way the market's does. That covers about ${pct(S.shape.share_explained, 0)} of the tilt. The bell curve covers none. ` +
+    `I did not expect all of it. The model only knows how markets have moved. Option prices also hold what people will pay to stop worrying, and that is not in any price history.`;
+  $("solverNote").textContent = `Finding each of those volatilities is a search. The standard search, Newton's method, solved ${I.how.newton} of the ${M.usable} real quotes and needed no help. ` +
+    `So I made up 1,000 awkward options, far from the strike or nearly expired, where the price barely responds to volatility. Newton gave up on ${I.hard.how.adam} of them. ` +
+    `The fallback is the Adam optimizer I wrote in project 1, and it found every one.`;
+
+  const N = D.endings;
+  const line = (ys, colour, name, dash) => ({ x: N.middle, y: ys.map(v => v > 0 ? v : null), mode: "lines", connectgaps: false, line: { color: colour, width: 2, dash: dash || "solid" }, hovertemplate: "%{x}%: %{y:.2%} of stretches<extra>" + name + "</extra>" });
+  draw("endings", [line(N.bell_curve, css("--flat"), "Bell curve", "dash"), line(N.diffusion, css("--model"), "Diffusion"), line(N.real, "#000", "Real")],
+    { xaxis: axis({ showgrid: false, ticksuffix: "%", title: { text: "Change over three months" } }), yaxis: axis({ type: "log", range: [-4, -0.5], tickvals: [0.0001, 0.001, 0.01, 0.1], ticktext: ["0.01%", "0.1%", "1%", "10%"], title: { text: "Share of stretches" } }) });
+
+  const F = D.scenarios.fingerprints, C = D.scenarios.copied, gone = D.scenarios.discarded || 0;
+  const rows = [["yearly_volatility", "Swing in a year", v => pct(v)], ["days_beyond_3", "Days three times bigger than a typical day", v => pct(v, 2)],
+    ["echo_1_day", "Does a big day follow a big day? (0 is no)", v => v.toFixed(2)], ["calm_to_wild", "Wildest stretches against the calmest", v => v.toFixed(1) + " times"],
+    ["three_month_fall_10", "Stretches that lost over 10%", v => pct(v)], ["three_month_fall_20", "Stretches that lost over 20%", v => pct(v, 2)],
+    ["three_month_worst_1_in_100", "The worst three months in a hundred", v => pct(v)]];
+  $("prints").innerHTML = "<thead><tr><th></th><th>Real history</th><th>Diffusion model</th><th>Bell curve</th></tr></thead><tbody>" +
+    rows.map(([k, label, f]) => `<tr><td class="words">${label}</td><td>${f(F.real[k])}</td><td>${f(F.diffusion[k])}</td><td>${f(F.bell_curve[k])}</td></tr>`).join("") + "</tbody>";
+  $("printNote").textContent = `It made ${(D.scenarios.made + gone).toLocaleString()}. ` + (gone ? `${gone === 2 ? "Two" : gone} came out broken, with a single day worse than any on record, and I threw those away. ` : "") +
+    `The rest are not copies of history: each one is about as far from its nearest real stretch as real stretches are from each other. Here is how they compare with the ${D.scenarios.history_windows.toLocaleString()} real ones.`;
+  paths();
+}
+
+function paths() {
+  const pick = { real: ["pReal", "#000"], diffusion: ["pMade", css("--model")], bell_curve: ["pBell", css("--flat")] };
+  for (const [name, [id]] of Object.entries(pick)) $(id).setAttribute("aria-pressed", name === shown);
+  draw("paths", D.paths[shown].map(p => ({ y: p, mode: "lines", line: { color: pick[shown][1], width: 1.1 }, opacity: 0.55, hoverinfo: "skip" })),
+    { xaxis: axis({ showgrid: false, title: { text: "Trading days" } }), yaxis: axis({ range: [62, 128] }) });
+}
+
+fields.forEach(id => { $(id).addEventListener("input", calculator); $(id).addEventListener("focus", () => point(id)); });
+$("sKind").addEventListener("change", calculator);
+$("dial").addEventListener("input", () => { $(active).value = $("dial").value; calculator(); });
+$("reset").addEventListener("click", () => { reset(); point(active); calculator(); });
+[["pReal", "real"], ["pMade", "diffusion"], ["pBell", "bell_curve"]].forEach(([id, name]) => $(id).addEventListener("click", () => { shown = name; paths(); }));
+reset(); point(active);
+if (window.Plotly) { fixedCharts(); calculator(); }
+else $("verdict").textContent = "The chart library did not load. Check your internet connection and reload.";
+</script>
+</body>
+</html>

@@ -30,3 +30,7 @@ jobs:
         run: node tests/check_site28.js
       - name: Check the valuation page sums against the Python ones
         run: node tests/check_dcf.js
+      - name: Check the loan page sums against the Python ones
+        run: node tests/check_loan.js
+      - name: Check the options page sums against the Python ones
+        run: node tests/check_options.js

@@ -17,4 +17,5 @@ prepare_log.txt
 5_story_gpt/model_big.pt
 5_story_gpt/samples_big.md
 5_story_gpt/result_big.png
+13_options_pricer/data/
 STUDY_GUIDE.md

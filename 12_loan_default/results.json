@@ -1,0 +1,1415 @@
+{
+ "note": "Real, public data: 30,000 credit card customers in Taiwan in 2005 (UCI), and US economic figures (FRED). A worked method, not a production credit model.",
+ "data": {
+  "customers": 30000,
+  "default_rate": 0.2212,
+  "learn": 18000,
+  "choose": 6000,
+  "test": 6000,
+  "features": {
+   "late_now": "Months behind on the latest bill",
+   "late_before": "Months behind the month before",
+   "late_worst": "Worst lateness in the four months before that",
+   "months_late": "How many of the last six months had a late payment",
+   "used": "Share of the credit limit in use",
+   "paid_share": "Share of the last bill that was paid",
+   "paid_share_usual": "Share of the bill usually paid, over five months",
+   "limit": "Size of the credit limit",
+   "balance_change": "Change in the balance over five months, as a share of the limit",
+   "dormant": "Card not used last month"
+  },
+  "left_out": [
+   "sex",
+   "age",
+   "marriage",
+   "education"
+  ]
+ },
+ "model": {
+  "chosen": "network",
+  "steps": 4000,
+  "numbers": 97,
+  "auc": 0.7684562913740592,
+  "gini": 0.5369125827481185,
+  "ks": 0.4153524745535619,
+  "comparison": {
+   "This project: network on the hand-built engine": 0.7684562913740592,
+   "This project: one neuron on the hand-built engine": 0.7470919163228308,
+   "scikit-learn logistic regression": 0.7500355775765426,
+   "scikit-learn gradient boosting": 0.7717519366786905,
+   "Gradient boosting, also given sex, age, marriage, education": 0.7730240165583365
+  },
+  "seconds": {
+   "one neuron": 13.43755054473877,
+   "network": 89.31232953071594
+  },
+  "loss_curve": {
+   "one neuron": [
+    0.5361617253171466,
+    0.45280355333360595,
+    0.4410004698493808,
+    0.43385915264591945,
+    0.4468790341591847,
+    0.436076932841274,
+    0.42803539843875343,
+    0.4455334446931692,
+    0.4325004280547626,
+    0.42566349036468987,
+    0.43215410175872093,
+    0.43240346515563083,
+    0.4407860734850921,
+    0.44343770293706763,
+    0.44503013375573386,
+    0.4398242826581129,
+    0.4446195242201037,
+    0.4294955293193174,
+    0.4427460067746646,
+    0.4438171878924118,
+    0.44361654272089346,
+    0.4473049814896693,
+    0.4383465702408506,
+    0.42883557867086786,
+    0.44952000196638403,
+    0.43202016850643543,
+    0.4382922748169645,
+    0.4340155181731319,
+    0.44354776371148524,
+    0.43451305663985523,
+    0.4222147371826309,
+    0.42994424167087253,
+    0.4412590223524976,
+    0.4457872810359616,
+    0.43704400671610555,
+    0.44251241542145014,
+    0.4561564107146134,
+    0.43971205577886296,
+    0.4359527308479224,
+    0.44428960645488913
+   ],
+   "network": [
+    0.4730379146926935,
+    0.4368492435508414,
+    0.43180731768485126,
+    0.4290360832225469,
+    0.44208246254180183,
+    0.4289615401296761,
+    0.4204276557167399,
+    0.4390229266070021,
+    0.42697489447154474,
+    0.41792660202538817,
+    0.42466706879864136,
+    0.42338121787945476,
+    0.43005007324453265,
+    0.4319785462424045,
+    0.4341363393068577,
+    0.43082357013504824,
+    0.4358074838298018,
+    0.4213432763828508,
+    0.4318793244208959,
+    0.4355072925823712,
+    0.4303969363630879,
+    0.4383694288321035,
+    0.427137294254469,
+    0.41827529544370057,
+    0.43553792986961065,
+    0.42197537657208406,
+    0.42734612386954607,
+    0.42118162350457317,
+    0.43168600036818966,
+    0.4219104910282476,
+    0.40694999715847646,
+    0.4186713839799232,
+    0.42928553507023365,
+    0.4308204161177693,
+    0.4258672720104134,
+    0.43026569653494806,
+    0.44552669409493595,
+    0.4314929897200823,
+    0.42352470638742207,
+    0.4289571448700162
+   ]
+  }
+ },
+ "calibration": [
+  {
+   "group": 0,
+   "predicted": 0.045481675,
+   "actual": 0.0516666667,
+   "customers": 600
+  },
+  {
+   "group": 1,
+   "predicted": 0.0790290067,
+   "actual": 0.0633333333,
+   "customers": 600
+  },
+  {
+   "group": 2,
+   "predicted": 0.1104703233,
+   "actual": 0.105,
+   "customers": 600
+  },
+  {
+   "group": 3,
+   "predicted": 0.1345021033,
+   "actual": 0.1383333333,
+   "customers": 600
+  },
+  {
+   "group": 4,
+   "predicted": 0.1490087583,
+   "actual": 0.1466666667,
+   "customers": 600
+  },
+  {
+   "group": 5,
+   "predicted": 0.1641975467,
+   "actual": 0.1583333333,
+   "customers": 600
+  },
+  {
+   "group": 6,
+   "predicted": 0.2030540467,
+   "actual": 0.1766666667,
+   "customers": 600
+  },
+  {
+   "group": 7,
+   "predicted": 0.28566636,
+   "actual": 0.2716666667,
+   "customers": 600
+  },
+  {
+   "group": 8,
+   "predicted": 0.4093027367,
+   "actual": 0.4066666667,
+   "customers": 600
+  },
+  {
+   "group": 9,
+   "predicted": 0.7004789983,
+   "actual": 0.6916666667,
+   "customers": 600
+  }
+ ],
+ "policy": {
+  "break_even_risk": 0.16666666666666666,
+  "margin": 0.15,
+  "loss_if_default": 0.75,
+  "customers": 6000,
+  "balance": 308557841.0,
+  "default_rate_all": 0.221,
+  "lend_to_all": -9983341.950000001,
+  "with_model": 11532628.649999999,
+  "approved": 0.5618333333333333,
+  "default_rate_approved": 0.1097597152180362,
+  "default_rate_declined": 0.36363636363636365,
+  "best_possible": 36905839.8
+ },
+ "normal_curve": [
+  {
+   "cutoff": 0.02,
+   "approved": 0.0,
+   "profit": 0.0,
+   "default_rate": 0.0,
+   "balance_lent": 0.0
+  },
+  {
+   "cutoff": 0.04,
+   "approved": 0.032,
+   "profit": 2275780.6499999994,
+   "default_rate": 0.026041666666666668,
+   "balance_lent": 19421521.0
+  },
+  {
+   "cutoff": 0.06,
+   "approved": 0.095,
+   "profit": 4663364.55,
+   "default_rate": 0.05087719298245614,
+   "balance_lent": 53660455.0
+  },
+  {
+   "cutoff": 0.08,
+   "approved": 0.15283333333333332,
+   "profit": 8068204.200000001,
+   "default_rate": 0.05452562704471101,
+   "balance_lent": 83240456.0
+  },
+  {
+   "cutoff": 0.1,
+   "approved": 0.21,
+   "profit": 10613188.649999999,
+   "default_rate": 0.05952380952380952,
+   "balance_lent": 106899425.0
+  },
+  {
+   "cutoff": 0.12,
+   "approved": 0.288,
+   "profit": 10247200.95,
+   "default_rate": 0.07175925925925926,
+   "balance_lent": 131641097.0
+  },
+  {
+   "cutoff": 0.14,
+   "approved": 0.37283333333333335,
+   "profit": 11787142.799999999,
+   "default_rate": 0.08448815377738042,
+   "balance_lent": 158175680.0
+  },
+  {
+   "cutoff": 0.16,
+   "approved": 0.5368333333333334,
+   "profit": 11722165.349999998,
+   "default_rate": 0.1061782055262341,
+   "balance_lent": 187220419.0
+  },
+  {
+   "cutoff": 0.18,
+   "approved": 0.606,
+   "profit": 12037108.799999999,
+   "default_rate": 0.11138613861386139,
+   "balance_lent": 209360522.0
+  },
+  {
+   "cutoff": 0.2,
+   "approved": 0.6466666666666666,
+   "profit": 12077879.099999998,
+   "default_rate": 0.11494845360824742,
+   "balance_lent": 220828300.0
+  },
+  {
+   "cutoff": 0.22,
+   "approved": 0.679,
+   "profit": 12152031.899999999,
+   "default_rate": 0.11757486499754541,
+   "balance_lent": 230174002.0
+  },
+  {
+   "cutoff": 0.24,
+   "approved": 0.7015,
+   "profit": 11864447.85,
+   "default_rate": 0.11974340698503208,
+   "balance_lent": 234438995.0
+  },
+  {
+   "cutoff": 0.26,
+   "approved": 0.7253333333333334,
+   "profit": 11830612.799999997,
+   "default_rate": 0.12385110294117647,
+   "balance_lent": 237768944.0
+  },
+  {
+   "cutoff": 0.28,
+   "approved": 0.7405,
+   "profit": 11888289.0,
+   "default_rate": 0.1253657438667567,
+   "balance_lent": 241820166.0
+  },
+  {
+   "cutoff": 0.3,
+   "approved": 0.7565,
+   "profit": 11757703.049999999,
+   "default_rate": 0.12954395241242564,
+   "balance_lent": 245315937.0
+  },
+  {
+   "cutoff": 0.32,
+   "approved": 0.8005,
+   "profit": 11856354.599999998,
+   "default_rate": 0.13887153862169477,
+   "balance_lent": 249021830.0
+  },
+  {
+   "cutoff": 0.34,
+   "approved": 0.8171666666666667,
+   "profit": 11680729.049999999,
+   "default_rate": 0.1417499490108097,
+   "balance_lent": 251510585.0
+  },
+  {
+   "cutoff": 0.36,
+   "approved": 0.83,
+   "profit": 11278686.149999999,
+   "default_rate": 0.14558232931726908,
+   "balance_lent": 252993627.0
+  },
+  {
+   "cutoff": 0.38,
+   "approved": 0.8401666666666666,
+   "profit": 11185271.85,
+   "default_rate": 0.1481848839515969,
+   "balance_lent": 254823221.0
+  },
+  {
+   "cutoff": 0.4,
+   "approved": 0.8486666666666667,
+   "profit": 10824478.349999998,
+   "default_rate": 0.15121759622937941,
+   "balance_lent": 256183321.0
+  },
+  {
+   "cutoff": 0.42,
+   "approved": 0.8573333333333333,
+   "profit": 10423132.799999999,
+   "default_rate": 0.15338258164852256,
+   "balance_lent": 258030220.0
+  },
+  {
+   "cutoff": 0.44,
+   "approved": 0.8645,
+   "profit": 9729551.249999998,
+   "default_rate": 0.1559668401773665,
+   "balance_lent": 260316087.0
+  },
+  {
+   "cutoff": 0.46,
+   "approved": 0.8725,
+   "profit": 9243566.249999998,
+   "default_rate": 0.15912129894937918,
+   "balance_lent": 263368849.0
+  },
+  {
+   "cutoff": 0.48,
+   "approved": 0.8828333333333334,
+   "profit": 8690093.849999998,
+   "default_rate": 0.16235605059467623,
+   "balance_lent": 266237747.0
+  },
+  {
+   "cutoff": 0.5,
+   "approved": 0.8908333333333334,
+   "profit": 8184810.899999999,
+   "default_rate": 0.16426566884939195,
+   "balance_lent": 268093520.0
+  },
+  {
+   "cutoff": 0.52,
+   "approved": 0.8973333333333333,
+   "profit": 6815529.8999999985,
+   "default_rate": 0.16734769687964338,
+   "balance_lent": 270906456.0
+  },
+  {
+   "cutoff": 0.54,
+   "approved": 0.9051666666666667,
+   "profit": 6268250.85,
+   "default_rate": 0.17087092616461058,
+   "balance_lent": 272598421.0
+  },
+  {
+   "cutoff": 0.56,
+   "approved": 0.9118333333333334,
+   "profit": 5570495.099999999,
+   "default_rate": 0.17327728020471578,
+   "balance_lent": 275534592.0
+  },
+  {
+   "cutoff": 0.58,
+   "approved": 0.915,
+   "profit": 5432127.749999998,
+   "default_rate": 0.17486338797814208,
+   "balance_lent": 276024759.0
+  },
+  {
+   "cutoff": 0.6,
+   "approved": 0.9171666666666667,
+   "profit": 5290406.699999999,
+   "default_rate": 0.17572233327276032,
+   "balance_lent": 276524296.0
+  },
+  {
+   "cutoff": 0.62,
+   "approved": 0.9206666666666666,
+   "profit": 5037865.6499999985,
+   "default_rate": 0.17722664735698768,
+   "balance_lent": 277619547.0
+  },
+  {
+   "cutoff": 0.64,
+   "approved": 0.9273333333333333,
+   "profit": 2453152.199999999,
+   "default_rate": 0.1806254493170381,
+   "balance_lent": 282621034.0
+  },
+  {
+   "cutoff": 0.66,
+   "approved": 0.9346666666666666,
+   "profit": 951912.2999999989,
+   "default_rate": 0.18420114122681883,
+   "balance_lent": 286707356.0
+  },
+  {
+   "cutoff": 0.68,
+   "approved": 0.9386666666666666,
+   "profit": -258338.55000000075,
+   "default_rate": 0.18678977272727273,
+   "balance_lent": 288813613.0
+  },
+  {
+   "cutoff": 0.7,
+   "approved": 0.95,
+   "profit": -3295687.3500000015,
+   "default_rate": 0.1931578947368421,
+   "balance_lent": 295278265.0
+  },
+  {
+   "cutoff": 0.72,
+   "approved": 0.9576666666666667,
+   "profit": -5009299.200000002,
+   "default_rate": 0.19735468151757746,
+   "balance_lent": 299164008.0
+  },
+  {
+   "cutoff": 0.74,
+   "approved": 0.9628333333333333,
+   "profit": -5884052.850000001,
+   "default_rate": 0.19993075990998788,
+   "balance_lent": 300873129.0
+  },
+  {
+   "cutoff": 0.76,
+   "approved": 0.9688333333333333,
+   "profit": -6464563.2,
+   "default_rate": 0.20350937553758816,
+   "balance_lent": 302263428.0
+  },
+  {
+   "cutoff": 0.78,
+   "approved": 0.9756666666666667,
+   "profit": -7544731.200000001,
+   "default_rate": 0.20737956952511102,
+   "balance_lent": 304246604.0
+  },
+  {
+   "cutoff": 0.8,
+   "approved": 0.9841666666666666,
+   "profit": -8759335.5,
+   "default_rate": 0.2120237087214225,
+   "balance_lent": 306388770.0
+  },
+  {
+   "cutoff": 0.82,
+   "approved": 0.991,
+   "profit": -9505761.0,
+   "default_rate": 0.21611167171207535,
+   "balance_lent": 307693172.0
+  },
+  {
+   "cutoff": 0.84,
+   "approved": 0.9935,
+   "profit": -9580510.95,
+   "default_rate": 0.21724542861935917,
+   "balance_lent": 307874585.0
+  },
+  {
+   "cutoff": 0.86,
+   "approved": 0.9953333333333333,
+   "profit": -9773629.5,
+   "default_rate": 0.21818486269256532,
+   "balance_lent": 308189632.0
+  },
+  {
+   "cutoff": 0.88,
+   "approved": 0.9983333333333333,
+   "profit": -9904206.3,
+   "default_rate": 0.21986644407345576,
+   "balance_lent": 308420744.0
+  },
+  {
+   "cutoff": 0.9,
+   "approved": 1.0,
+   "profit": -9983341.950000001,
+   "default_rate": 0.221,
+   "balance_lent": 308557841.0
+  },
+  {
+   "cutoff": 0.92,
+   "approved": 1.0,
+   "profit": -9983341.950000001,
+   "default_rate": 0.221,
+   "balance_lent": 308557841.0
+  },
+  {
+   "cutoff": 0.94,
+   "approved": 1.0,
+   "profit": -9983341.950000001,
+   "default_rate": 0.221,
+   "balance_lent": 308557841.0
+  },
+  {
+   "cutoff": 0.96,
+   "approved": 1.0,
+   "profit": -9983341.950000001,
+   "default_rate": 0.221,
+   "balance_lent": 308557841.0
+  },
+  {
+   "cutoff": 0.98,
+   "approved": 1.0,
+   "profit": -9983341.950000001,
+   "default_rate": 0.221,
+   "balance_lent": 308557841.0
+  },
+  {
+   "cutoff": 1.0,
+   "approved": 1.0,
+   "profit": -9983341.950000001,
+   "default_rate": 0.221,
+   "balance_lent": 308557841.0
+  }
+ ],
+ "normal_expected_curve": [
+  {
+   "cutoff": 0.02,
+   "profit": 0.0
+  },
+  {
+   "cutoff": 0.04,
+   "profit": 2298725.7001881003
+  },
+  {
+   "cutoff": 0.06,
+   "profit": 5917363.443800699
+  },
+  {
+   "cutoff": 0.08,
+   "profit": 8497600.3931394
+  },
+  {
+   "cutoff": 0.1,
+   "profit": 10129876.003610399
+  },
+  {
+   "cutoff": 0.12,
+   "profit": 11403995.276024401
+  },
+  {
+   "cutoff": 0.14,
+   "profit": 12282346.3497627
+  },
+  {
+   "cutoff": 0.16,
+   "profit": 12733644.4856547
+  },
+  {
+   "cutoff": 0.18,
+   "profit": 12664246.9247787
+  },
+  {
+   "cutoff": 0.2,
+   "profit": 12443292.823675198
+  },
+  {
+   "cutoff": 0.22,
+   "profit": 12093215.1249273
+  },
+  {
+   "cutoff": 0.24,
+   "profit": 11851322.131674299
+  },
+  {
+   "cutoff": 0.26,
+   "profit": 11599790.026071899
+  },
+  {
+   "cutoff": 0.28,
+   "profit": 11222288.334196199
+  },
+  {
+   "cutoff": 0.3,
+   "profit": 10834378.583672699
+  },
+  {
+   "cutoff": 0.32,
+   "profit": 10348312.993709698
+  },
+  {
+   "cutoff": 0.34,
+   "profit": 9981998.224407298
+  },
+  {
+   "cutoff": 0.36,
+   "profit": 9735813.175737599
+  },
+  {
+   "cutoff": 0.38,
+   "profit": 9402616.0717698
+  },
+  {
+   "cutoff": 0.4,
+   "profit": 9131194.985573398
+  },
+  {
+   "cutoff": 0.42,
+   "profit": 8725134.854452197
+  },
+  {
+   "cutoff": 0.44,
+   "profit": 8183834.257639498
+  },
+  {
+   "cutoff": 0.46,
+   "profit": 7399792.309524899
+  },
+  {
+   "cutoff": 0.48,
+   "profit": 6616656.576709499
+  },
+  {
+   "cutoff": 0.5,
+   "profit": 6073210.2695285985
+  },
+  {
+   "cutoff": 0.52,
+   "profit": 5203024.652685598
+  },
+  {
+   "cutoff": 0.54,
+   "profit": 4648396.372675798
+  },
+  {
+   "cutoff": 0.56,
+   "profit": 3642636.3008867987
+  },
+  {
+   "cutoff": 0.58,
+   "profit": 3464770.091753699
+  },
+  {
+   "cutoff": 0.6,
+   "profit": 3275557.9676627982
+  },
+  {
+   "cutoff": 0.62,
+   "profit": 2838123.3869261984
+  },
+  {
+   "cutoff": 0.64,
+   "profit": 753007.9988120984
+  },
+  {
+   "cutoff": 0.66,
+   "profit": -1013551.1266506016
+  },
+  {
+   "cutoff": 0.68,
+   "profit": -1970466.9956589015
+  },
+  {
+   "cutoff": 0.7,
+   "profit": -5022721.008156901
+  },
+  {
+   "cutoff": 0.72,
+   "profit": -6912656.385080403
+  },
+  {
+   "cutoff": 0.74,
+   "profit": -7778155.004631901
+  },
+  {
+   "cutoff": 0.76,
+   "profit": -8506559.181289501
+  },
+  {
+   "cutoff": 0.78,
+   "profit": -9584483.059322702
+  },
+  {
+   "cutoff": 0.8,
+   "profit": -10789889.799411003
+  },
+  {
+   "cutoff": 0.82,
+   "profit": -11542777.742679002
+  },
+  {
+   "cutoff": 0.84,
+   "profit": -11650982.878797902
+  },
+  {
+   "cutoff": 0.86,
+   "profit": -11843285.548985401
+  },
+  {
+   "cutoff": 0.88,
+   "profit": -11990218.608253501
+  },
+  {
+   "cutoff": 0.9,
+   "profit": -12078743.396312403
+  },
+  {
+   "cutoff": 0.92,
+   "profit": -12078743.396312403
+  },
+  {
+   "cutoff": 0.94,
+   "profit": -12078743.396312403
+  },
+  {
+   "cutoff": 0.96,
+   "profit": -12078743.396312403
+  },
+  {
+   "cutoff": 0.98,
+   "profit": -12078743.396312403
+  },
+  {
+   "cutoff": 1.0,
+   "profit": -12078743.396312403
+  }
+ ],
+ "recession_curve": [
+  {
+   "cutoff": 0.02,
+   "approved": 0.0,
+   "profit": 0.0
+  },
+  {
+   "cutoff": 0.04,
+   "approved": 0.032,
+   "profit": 1731475.4102479196
+  },
+  {
+   "cutoff": 0.06,
+   "approved": 0.095,
+   "profit": 3989534.239966415
+  },
+  {
+   "cutoff": 0.08,
+   "approved": 0.15283333333333332,
+   "profit": 4971016.101748056
+  },
+  {
+   "cutoff": 0.1,
+   "approved": 0.21,
+   "profit": 5018321.290551728
+  },
+  {
+   "cutoff": 0.12,
+   "approved": 0.288,
+   "profit": 4353961.176877825
+  },
+  {
+   "cutoff": 0.14,
+   "approved": 0.37283333333333335,
+   "profit": 2864855.2847236292
+  },
+  {
+   "cutoff": 0.16,
+   "approved": 0.5368333333333334,
+   "profit": 451058.0005431915
+  },
+  {
+   "cutoff": 0.18,
+   "approved": 0.606,
+   "profit": -2002486.1772587067
+  },
+  {
+   "cutoff": 0.2,
+   "approved": 0.6466666666666666,
+   "profit": -3538991.2536416003
+  },
+  {
+   "cutoff": 0.22,
+   "approved": 0.679,
+   "profit": -5027686.650139006
+  },
+  {
+   "cutoff": 0.24,
+   "approved": 0.7015,
+   "profit": -5817431.218858711
+  },
+  {
+   "cutoff": 0.26,
+   "approved": 0.7253333333333334,
+   "profit": -6515467.8156066425
+  },
+  {
+   "cutoff": 0.28,
+   "approved": 0.7405,
+   "profit": -7454619.938825862
+  },
+  {
+   "cutoff": 0.3,
+   "approved": 0.7565,
+   "profit": -8340864.625872106
+  },
+  {
+   "cutoff": 0.32,
+   "approved": 0.8005,
+   "profit": -9368778.530115422
+  },
+  {
+   "cutoff": 0.34,
+   "approved": 0.8171666666666667,
+   "profit": -10104784.086487848
+  },
+  {
+   "cutoff": 0.36,
+   "approved": 0.83,
+   "profit": -10574415.842834534
+  },
+  {
+   "cutoff": 0.38,
+   "approved": 0.8401666666666666,
+   "profit": -11185678.56280129
+  },
+  {
+   "cutoff": 0.4,
+   "approved": 0.8486666666666667,
+   "profit": -11665064.556534022
+  },
+  {
+   "cutoff": 0.42,
+   "approved": 0.8573333333333333,
+   "profit": -12354345.839315709
+  },
+  {
+   "cutoff": 0.44,
+   "approved": 0.8645,
+   "profit": -13245881.072269332
+  },
+  {
+   "cutoff": 0.46,
+   "approved": 0.8725,
+   "profit": -14495481.487026911
+  },
+  {
+   "cutoff": 0.48,
+   "approved": 0.8828333333333334,
+   "profit": -15713288.63197111
+  },
+  {
+   "cutoff": 0.5,
+   "approved": 0.8908333333333334,
+   "profit": -16534709.312628927
+  },
+  {
+   "cutoff": 0.52,
+   "approved": 0.8973333333333333,
+   "profit": -17821078.68735344
+  },
+  {
+   "cutoff": 0.54,
+   "approved": 0.9051666666666667,
+   "profit": -18621863.768075235
+  },
+  {
+   "cutoff": 0.56,
+   "approved": 0.9118333333333334,
+   "profit": -20048139.780002613
+  },
+  {
+   "cutoff": 0.58,
+   "approved": 0.915,
+   "profit": -20294462.007706888
+  },
+  {
+   "cutoff": 0.6,
+   "approved": 0.9171666666666667,
+   "profit": -20551885.31751816
+  },
+  {
+   "cutoff": 0.62,
+   "approved": 0.9206666666666666,
+   "profit": -21134001.493297793
+  },
+  {
+   "cutoff": 0.64,
+   "approved": 0.9273333333333333,
+   "profit": -23859108.514275704
+  },
+  {
+   "cutoff": 0.66,
+   "approved": 0.9346666666666666,
+   "profit": -26132644.487378564
+  },
+  {
+   "cutoff": 0.68,
+   "approved": 0.9386666666666666,
+   "profit": -27338290.72108099
+  },
+  {
+   "cutoff": 0.7,
+   "approved": 0.95,
+   "profit": -31120496.171639092
+  },
+  {
+   "cutoff": 0.72,
+   "approved": 0.9576666666666667,
+   "profit": -33432320.64589427
+  },
+  {
+   "cutoff": 0.74,
+   "approved": 0.9628333333333333,
+   "profit": -34472414.974441774
+  },
+  {
+   "cutoff": 0.76,
+   "approved": 0.9688333333333333,
+   "profit": -35334652.00654717
+  },
+  {
+   "cutoff": 0.78,
+   "approved": 0.9756666666666667,
+   "profit": -36589798.54507977
+  },
+  {
+   "cutoff": 0.8,
+   "approved": 0.9841666666666666,
+   "profit": -37971554.446371436
+  },
+  {
+   "cutoff": 0.82,
+   "approved": 0.991,
+   "profit": -38824637.884102255
+  },
+  {
+   "cutoff": 0.84,
+   "approved": 0.9935,
+   "profit": -38945404.17570174
+  },
+  {
+   "cutoff": 0.86,
+   "approved": 0.9953333333333333,
+   "profit": -39157743.49666275
+  },
+  {
+   "cutoff": 0.88,
+   "approved": 0.9983333333333333,
+   "profit": -39316918.067726806
+  },
+  {
+   "cutoff": 0.9,
+   "approved": 1.0,
+   "profit": -39412117.526708804
+  },
+  {
+   "cutoff": 0.92,
+   "approved": 1.0,
+   "profit": -39412117.526708804
+  },
+  {
+   "cutoff": 0.94,
+   "approved": 1.0,
+   "profit": -39412117.526708804
+  },
+  {
+   "cutoff": 0.96,
+   "approved": 1.0,
+   "profit": -39412117.526708804
+  },
+  {
+   "cutoff": 0.98,
+   "approved": 1.0,
+   "profit": -39412117.526708804
+  },
+  {
+   "cutoff": 1.0,
+   "approved": 1.0,
+   "profit": -39412117.526708804
+  }
+ ],
+ "recession": {
+  "features": [
+   "unemployment_rise",
+   "jobs_growth",
+   "output_growth"
+  ],
+  "moods": [
+   "growing",
+   "slowing",
+   "shrinking"
+  ],
+  "typical": [
+   [
+    -0.4191251078716685,
+    0.7526906126201629,
+    0.8553353946695185
+   ],
+   [
+    0.034106040017303926,
+    -0.057382132684352126,
+    -0.07830824659815463
+   ],
+   [
+    1.2628947514395765,
+    -1.2521832069556076,
+    -1.179392262682463
+   ]
+  ],
+  "stay": [
+   0.9319605679689918,
+   0.9544017006310671,
+   0.9180685538250176
+  ],
+  "marks": {
+   "hindsight": {
+    "months": 874,
+    "official_recession_months": 109,
+    "official_recessions": 11,
+    "recessions_caught": 11,
+    "recession_months_caught": 0.7889908256880734,
+    "calm_months_called_stressed": 0.09019607843137255,
+    "months_agreeing": 0.8947368421052632,
+    "false_alarms": 1
+   },
+   "live": {
+    "months": 874,
+    "official_recession_months": 109,
+    "official_recessions": 11,
+    "recessions_caught": 11,
+    "recession_months_caught": 0.7247706422018348,
+    "calm_months_called_stressed": 0.10065359477124183,
+    "months_agreeing": 0.8775743707093822,
+    "false_alarms": 2
+   }
+  },
+  "spells": [
+   {
+    "start": "1953-12-01",
+    "end": "1954-10-01"
+   },
+   {
+    "start": "1956-07-01",
+    "end": "1956-07-01"
+   },
+   {
+    "start": "1957-09-01",
+    "end": "1958-09-01"
+   },
+   {
+    "start": "1959-10-01",
+    "end": "1959-12-01"
+   },
+   {
+    "start": "1960-07-01",
+    "end": "1961-07-01"
+   },
+   {
+    "start": "1970-02-01",
+    "end": "1971-03-01"
+   },
+   {
+    "start": "1974-10-01",
+    "end": "1975-08-01"
+   },
+   {
+    "start": "1980-04-01",
+    "end": "1980-11-01"
+   },
+   {
+    "start": "1981-11-01",
+    "end": "1983-03-01"
+   },
+   {
+    "start": "1990-10-01",
+    "end": "1991-09-01"
+   },
+   {
+    "start": "2001-04-01",
+    "end": "2002-06-01"
+   },
+   {
+    "start": "2008-04-01",
+    "end": "2010-03-01"
+   },
+   {
+    "start": "2020-03-01",
+    "end": "2021-03-01"
+   }
+  ],
+  "official_spells": [
+   {
+    "start": "1953-12-01",
+    "end": "1954-05-01"
+   },
+   {
+    "start": "1957-09-01",
+    "end": "1958-04-01"
+   },
+   {
+    "start": "1960-05-01",
+    "end": "1961-02-01"
+   },
+   {
+    "start": "1970-01-01",
+    "end": "1970-11-01"
+   },
+   {
+    "start": "1973-12-01",
+    "end": "1975-03-01"
+   },
+   {
+    "start": "1980-02-01",
+    "end": "1980-07-01"
+   },
+   {
+    "start": "1981-08-01",
+    "end": "1982-11-01"
+   },
+   {
+    "start": "1990-08-01",
+    "end": "1991-03-01"
+   },
+   {
+    "start": "2001-04-01",
+    "end": "2001-11-01"
+   },
+   {
+    "start": "2008-01-01",
+    "end": "2009-06-01"
+   },
+   {
+    "start": "2020-03-01",
+    "end": "2020-04-01"
+   }
+  ],
+  "first_month": "1953-12-01",
+  "last_month": "2026-10-01"
+ },
+ "stress": {
+  "multiplier": 1.4822104515846193,
+  "calm_written_off": 3.8423255813953485,
+  "recession_written_off": 5.695135135135135,
+  "average_risk_normal": 0.2281191555,
+  "average_risk_recession": 0.3381205964887569,
+  "normal_cutoff": 0.16666666666666666,
+  "fallback_cutoff": 0.091349,
+  "approved_normal": 0.5618333333333333,
+  "approved_fallback": 0.18266666666666667,
+  "expected_normal": 12753122.931582598,
+  "recession_without_fallback": -259822.69515017312,
+  "recession_with_fallback": 5086583.386051297,
+  "recession_lend_to_all": -39412117.526708804,
+  "expected_loss_normal": 13644854.432014499,
+  "expected_loss_recession": 24488975.787625145,
+  "live_reading": 0.00037033097730288064,
+  "cutoff_in_use": "normal",
+  "latest_month": "2026-10-01",
+  "fallback_saves": 5346406.08120147
+ },
+ "examples": [
+  {
+   "label": "Low risk",
+   "risk": 0.04993532827046272,
+   "average_customer_risk": 0.0911720078886577,
+   "recession_risk": 0.09471110440936013,
+   "defaulted": 0,
+   "balance": 154462.0,
+   "decision": "Lend",
+   "facts": {
+    "late_now": 0.0,
+    "late_before": 0.0,
+    "late_worst": 0.0,
+    "months_late": 0.0,
+    "used": 0.5940846153846154,
+    "paid_share": 0.048277296991527906,
+    "paid_share_usual": 0.04296762319593568,
+    "limit": 5.414973347970818,
+    "balance_change": 0.3360076923076923,
+    "dormant": 0.0
+   },
+   "reasons": [
+    {
+     "feature": "late_now",
+     "label": "Months behind on the latest bill",
+     "push": -0.0324664464400539
+    },
+    {
+     "feature": "limit",
+     "label": "Size of the credit limit",
+     "push": -0.02741793721742451
+    },
+    {
+     "feature": "paid_share",
+     "label": "Share of the last bill that was paid",
+     "push": 0.027047181142517845
+    },
+    {
+     "feature": "months_late",
+     "label": "How many of the last six months had a late payment",
+     "push": -0.01809119287204714
+    },
+    {
+     "feature": "used",
+     "label": "Share of the credit limit in use",
+     "push": 0.012843589747268028
+    },
+    {
+     "feature": "late_before",
+     "label": "Months behind the month before",
+     "push": -0.006436212220741283
+    },
+    {
+     "feature": "dormant",
+     "label": "Card not used last month",
+     "push": 0.002831839452095698
+    },
+    {
+     "feature": "balance_change",
+     "label": "Change in the balance over five months, as a share of the limit",
+     "push": 0.002674261683104299
+    },
+    {
+     "feature": "paid_share_usual",
+     "label": "Share of the bill usually paid, over five months",
+     "push": -0.0014831445600027018
+    },
+    {
+     "feature": "late_worst",
+     "label": "Worst lateness in the four months before that",
+     "push": -0.000686657010575906
+    }
+   ]
+  },
+  {
+   "label": "On the line",
+   "risk": 0.16663755818178558,
+   "average_customer_risk": 0.0911720078886577,
+   "recession_risk": 0.2847014449773391,
+   "defaulted": 0,
+   "balance": 319711.0,
+   "decision": "Lend",
+   "facts": {
+    "late_now": 0.0,
+    "late_before": 0.0,
+    "late_worst": 0.0,
+    "months_late": 0.0,
+    "used": 0.999096875,
+    "paid_share": 0.08931495430051505,
+    "paid_share_usual": 0.14052667484742387,
+    "limit": 5.505149978319906,
+    "balance_change": 0.8356,
+    "dormant": 0.0
+   },
+   "reasons": [
+    {
+     "feature": "used",
+     "label": "Share of the credit limit in use",
+     "push": 0.11789222553494635
+    },
+    {
+     "feature": "balance_change",
+     "label": "Change in the balance over five months, as a share of the limit",
+     "push": 0.059040810241188096
+    },
+    {
+     "feature": "late_now",
+     "label": "Months behind on the latest bill",
+     "push": -0.05755230226185722
+    },
+    {
+     "feature": "paid_share",
+     "label": "Share of the last bill that was paid",
+     "push": 0.044406306238699955
+    },
+    {
+     "feature": "limit",
+     "label": "Size of the credit limit",
+     "push": -0.044210869898966026
+    },
+    {
+     "feature": "months_late",
+     "label": "How many of the last six months had a late payment",
+     "push": -0.02797185811977143
+    },
+    {
+     "feature": "late_before",
+     "label": "Months behind the month before",
+     "push": -0.014432389800258866
+    },
+    {
+     "feature": "late_worst",
+     "label": "Worst lateness in the four months before that",
+     "push": 0.003082720997570396
+    },
+    {
+     "feature": "paid_share_usual",
+     "label": "Share of the bill usually paid, over five months",
+     "push": -0.003065186897322025
+    },
+    {
+     "feature": "dormant",
+     "label": "Card not used last month",
+     "push": -0.0014803269139010253
+    }
+   ]
+  },
+  {
+   "label": "High risk",
+   "risk": 0.6001646682133336,
+   "average_customer_risk": 0.0911720078886577,
+   "recession_risk": 0.7492352999255883,
+   "defaulted": 0,
+   "balance": 50539.0,
+   "decision": "Decline",
+   "facts": {
+    "late_now": 2.0,
+    "late_before": 2.0,
+    "late_worst": 2.0,
+    "months_late": 4.0,
+    "used": 1.01078,
+    "paid_share": 0.019993202311214188,
+    "paid_share_usual": 0.6039986404622428,
+    "limit": 4.698970004336019,
+    "balance_change": 0.41492,
+    "dormant": 0.0
+   },
+   "reasons": [
+    {
+     "feature": "late_now",
+     "label": "Months behind on the latest bill",
+     "push": 0.3743697281458959
+    },
+    {
+     "feature": "months_late",
+     "label": "How many of the last six months had a late payment",
+     "push": 0.20101445065674012
+    },
+    {
+     "feature": "late_before",
+     "label": "Months behind the month before",
+     "push": -0.146172227931707
+    },
+    {
+     "feature": "used",
+     "label": "Share of the credit limit in use",
+     "push": 0.10950815659733262
+    },
+    {
+     "feature": "limit",
+     "label": "Size of the credit limit",
+     "push": -0.022600904322940714
+    },
+    {
+     "feature": "paid_share",
+     "label": "Share of the last bill that was paid",
+     "push": 0.016662558341875956
+    },
+    {
+     "feature": "balance_change",
+     "label": "Change in the balance over five months, as a share of the limit",
+     "push": -0.010313887274479242
+    },
+    {
+     "feature": "dormant",
+     "label": "Card not used last month",
+     "push": -0.009185880113550975
+    },
+    {
+     "feature": "paid_share_usual",
+     "label": "Share of the bill usually paid, over five months",
+     "push": -0.00399574430759272
+    },
+    {
+     "feature": "late_worst",
+     "label": "Worst lateness in the four months before that",
+     "push": 0.0002716109257602864
+    }
+   ]
+  }
+ ]
+}

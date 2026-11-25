@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Who will miss their next payment?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.3/plotly.min.js"></script>
+<script src="data.js"></script>
+<script src="policy.js"></script>
+<style>
+  /* Colours follow the habit of financial models: blue is an input you may change, black is worked out, red is a loss. */
+  :root { --paper:#ffffff; --ink:#000000; --quiet:#5a5a5a; --rule:#000000; --hair:#d9d9d9; --input:#0b35d6; --model:#0b7a53; --flat:#8c8c8c; --loss:#c00000;
+    --serif:"Source Serif 4", Georgia, "Times New Roman", serif; --sans:"Source Sans 3", "Segoe UI", Arial, sans-serif; }
+  * { box-sizing:border-box; }
+  html { color-scheme:light; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:18px/1.62 var(--serif); }
+  main { max-width:60rem; margin:0 auto; padding:3.5rem 1.25rem 5rem; }
+  main > p, main > h1, main > h2, main > .sentence, main > .answer, main > .dial, main > small { max-width:41rem; }
+  h1 { font-size:clamp(2.1rem, 6vw, 3.25rem); line-height:1.08; font-weight:600; letter-spacing:-0.015em; margin:0 0 1.5rem; }
+  h2 { font-size:1.55rem; line-height:1.2; font-weight:600; margin:4rem 0 0.8rem; }
+  p { margin:0 0 1.05rem; }
+  a { color:inherit; text-underline-offset:3px; }
+  .key { font:400 0.9rem/1.45 var(--sans); color:var(--quiet); margin:0 0 2.5rem; }
+  .key b, .in { color:var(--input); }
+
+  .sentence { font-size:clamp(1.3rem, 3.6vw, 1.7rem); line-height:1.75; margin:0 0 0.4rem; }
+  .sentence input, .sentence select { font:inherit; font-weight:600; color:var(--input); background:none; border:0; border-bottom:2px dotted var(--input); border-radius:0;
+    padding:0 1px; margin:0; text-align:center; font-variant-numeric:tabular-nums lining-nums; -moz-appearance:textfield; appearance:textfield; }
+  .sentence select { appearance:auto; text-align:left; cursor:pointer; padding-right:0; }
+  .sentence input::-webkit-outer-spin-button, .sentence input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+  .sentence input.on { border-bottom-style:solid; background:#eef2ff; }
+  .sentence .in { font-weight:600; }
+  .glue { white-space:nowrap; }
+  .answer { font-size:clamp(1.3rem, 3.6vw, 1.7rem); line-height:1.4; margin:0 0 1.4rem; }
+  .answer output { font-weight:600; font-size:1.9em; letter-spacing:-0.01em; font-variant-numeric:tabular-nums lining-nums; }
+  .dial { display:grid; grid-template-columns:1fr auto; gap:0.1rem 1rem; align-items:center; font:400 0.95rem/1.4 var(--sans); color:var(--quiet); margin:0 0 2rem; }
+  .dial input { grid-column:1; width:100%; accent-color:var(--input); margin:0; height:28px; }
+  .dial label { grid-column:1 / -1; }
+  button { font:400 0.95rem/1.4 var(--sans); color:var(--ink); background:none; border:0; padding:4px 0; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+  :focus-visible { outline:2px solid var(--input); outline-offset:3px; }
+
+  figure { margin:2rem 0 2.4rem; }
+  figcaption { font:400 0.95rem/1.5 var(--sans); color:var(--quiet); max-width:41rem; margin-top:0.5rem; }
+  figcaption i { display:inline-block; width:22px; height:0; border-top:3px solid; vertical-align:4px; margin-right:5px; }
+  figcaption i.dash { border-top-style:dashed; }
+  .plot { height:340px; }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:0 2.5rem; }
+  .pair figure { min-width:0; }
+  @media (max-width: 760px) { .pair { grid-template-columns:1fr; } .plot { height:290px; } main { padding-top:2.25rem; } }
+
+  .scroll { overflow-x:auto; margin:1.4rem 0 0.4rem; }
+  table { border-collapse:collapse; font:400 1rem/1.4 var(--sans); font-variant-numeric:tabular-nums lining-nums; border-top:2px solid var(--rule); border-bottom:2px solid var(--rule); }
+  th, td { padding:0.42rem 1.6rem 0.42rem 0; text-align:right; white-space:nowrap; }
+  th:last-child, td:last-child { padding-right:0; }
+  th:first-child, td:first-child { text-align:left; }
+  td.words { text-align:left; white-space:normal; min-width:12rem; }
+  thead th { font-weight:600; border-bottom:1px solid var(--rule); vertical-align:bottom; }
+  tbody tr.total td { border-top:1px solid var(--rule); font-weight:600; }
+  .neg { color:var(--loss); }
+  @media (max-width: 760px) { table { font-size:0.9rem; width:100%; } th, td { padding-right:0.8rem; } td.words { min-width:0; } }
+  .show { font:400 0.95rem/1.4 var(--sans); color:var(--quiet); margin:0 0 0.3rem; }
+  .show button { margin-left:0.9rem; color:var(--quiet); }
+  .show button[aria-pressed="true"] { color:var(--ink); font-weight:600; text-decoration-thickness:2px; }
+  .aside { font:400 0.95rem/1.5 var(--sans); color:var(--quiet); margin-top:0.6rem; }
+  tbody tr.mine td { font-weight:600; }
+  .people { display:grid; grid-template-columns:repeat(3, 1fr); gap:0 2.5rem; }
+  .people table { width:100%; }
+  .people td.words { min-width:0; }
+  .people h3 { font:600 1.3rem/1.3 var(--serif); margin:1.6rem 0 0.2rem; }
+  .people p { font:400 0.95rem/1.5 var(--sans); color:var(--quiet); margin:0 0 0.6rem; }
+  @media (max-width: 900px) { .people { grid-template-columns:1fr; } }
+  small { display:block; font:400 0.92rem/1.55 var(--sans); color:var(--quiet); margin-top:4rem; padding-top:1rem; border-top:1px solid var(--hair); }
+  small p { margin:0 0 0.6rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Who will miss their next payment?</h1>
+  <p>A bank in Taiwan published the records of 30,000 credit card customers: what they owed, what they paid, how late they were, and whether they missed the next payment. About one in five did.</p>
+  <p>I trained a model to see it coming. I did not use a machine-learning library to do the learning. It runs on an engine and an optimizer I wrote myself, earlier in this repository. Then I worked out what a lender should do with the score, and what should change when a recession arrives.</p>
+  <p class="key">Numbers in <b>blue</b> are inputs, as they are in a spreadsheet model. Tap one and type, or drag the slider under the sentence. Losses are in <span class="neg">(red brackets)</span>.</p>
+
+  <p class="sentence">
+    If a customer who pays earns the lender <span class="in glue"><input id="sMargin" type="number" inputmode="decimal" min="5" max="30" step="0.5" aria-label="What a good customer earns, percent of balance a year" data-name="what a good customer earns">%</span> of their balance in a year,
+    and one who defaults costs <span class="in glue"><input id="sLoss" type="number" inputmode="decimal" min="40" max="100" step="1" aria-label="Loss on a default, percent of balance" data-name="what a default costs">%</span> of it,
+    and the economy is <select id="sEconomy" aria-label="Economy"><option value="normal">calm</option><option value="recession">in recession</option></select><span id="multWrap">,
+    with defaults running <span class="in glue"><input id="sMult" type="number" inputmode="decimal" min="1" max="2.5" step="0.01" aria-label="How many times normal defaults run in a recession" data-name="how much defaults multiply"></span> times normal</span>,
+  </p>
+  <p class="answer">lend only below <output id="value" for="sMargin sLoss sEconomy sMult"></output> risk.</p>
+  <div class="dial"><label for="dial" id="dialLabel"></label><input id="dial" type="range"><button id="reset">Put the real numbers back</button></div>
+
+  <p id="verdict"></p>
+  <div class="scroll"><table id="ways"></table></div>
+  <p id="tableNote" class="aside"></p>
+
+  <figure>
+    <div id="curve" class="plot"></div>
+    <figcaption>Profit on the 6,000 test customers for every cutoff I could have picked. <i style="color:var(--ink)"></i>Calm times, which is what really happened. <i style="color:var(--loss)"></i>A recession, from the stress test. The dotted lines mark the cutoff each one calls for.</figcaption>
+  </figure>
+
+  <h2 id="model">How good is the model?</h2>
+  <p>I kept 6,000 customers back and never let the model learn from them. Then I asked it to score them. The usual measure is AUC: take one customer who defaulted and one who paid, and see how often the model rates the defaulter as riskier. A coin gets 0.5. A perfect model gets 1.</p>
+  <div class="pair">
+    <div>
+      <div class="scroll"><table id="compare"></table></div>
+      <p id="compareNote" class="aside"></p>
+    </div>
+    <figure style="margin-top:1.2rem">
+      <div id="calibration" class="plot" style="height:300px"></div>
+      <figcaption>Customers in ten equal groups, safest to riskiest. On the dashed line, a predicted 30% really is 30%.</figcaption>
+    </figure>
+  </div>
+  <p>The second check matters as much as the first. My lending rule compares the model's percentage with a break-even percentage, so the percentages have to mean what they say. They do.</p>
+
+  <h2 id="recession">Knowing when a recession has started</h2>
+  <p>Official recession dates are announced about a year late, which is no use to a lender. So I built a second model and did not tell it what a recession is. Each month it sees three figures for the US economy: the change in unemployment, in jobs and in factory output. Its only instruction is to sort every month since 1953 into three moods. One of the moods it found is plainly "shrinking".</p>
+  <figure>
+    <div id="timeline" class="plot"></div>
+    <figcaption><i style="color:var(--ink)"></i>The chance the economy is shrinking, looking back over the whole record. <i style="color:var(--flat)"></i>The same, using only what was known that month. Grey bands are the official recessions, which the model never saw.</figcaption>
+  </figure>
+  <p id="marks"></p>
+  <figure>
+    <div id="losses" class="plot" style="height:280px"></div>
+    <figcaption><i style="color:var(--ink)"></i>The share of US credit card debt that banks wrote off, as a yearly rate. Grey bands are the months my model calls shrinking.</figcaption>
+  </figure>
+  <p id="lossNote"></p>
+
+  <h2 id="why">Why did this customer get this score?</h2>
+  <p>A lender who turns someone down has to say why. The engine that trained the model can also be pointed at one customer and asked how much each fact about them moved their risk away from the average customer's. The pieces add up exactly to the score.</p>
+  <div class="people" id="people"></div>
+
+  <small>
+    <p>This shows a method. It is not a credit model anyone should lend with. The customers are from one bank in Taiwan in 2005 and the recession figures are American, because no public data has both. "Default" here means missing the next month's payment.</p>
+    <p>The model sees only how a customer has handled credit. Sex, age, marital status and education are in the data and I left them out.</p>
+    <p>Customer data: I-Cheng Yeh, "Default of credit card clients", UCI Machine Learning Repository, CC BY 4.0. Economic figures: FRED, Federal Reserve Bank of St. Louis.</p>
+    <p>The code and a longer write-up are at <a href="https://github.com/aopejf/ml-from-scratch/tree/main/12_loan_default">github.com/aopejf/ml-from-scratch</a>.</p>
+  </small>
+</main>
+
+<script>
+const D = window.DATA, C = D.customers, P0 = D.policy, ST = D.stress;
+const $ = id => document.getElementById(id);
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const pct = (v, d = 0) => (v * 100).toFixed(d) + "%";
+const plain = v => (v < 0 ? "a loss of " : "a profit of ") + "NT$" + (Math.abs(v) / 1e6).toFixed(1) + "m";
+const money = v => v < 0 ? `<span class="neg">(NT$${(-v / 1e6).toFixed(1)}m)</span>` : "NT$" + (v / 1e6).toFixed(1) + "m";  // losses the way accounts show them
+
+function layout(extra) {
+  return Object.assign({
+    margin: { l: 66, r: 8, t: 8, b: 56 }, paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: css("--sans"), size: 14, color: css("--quiet") }, showlegend: false,
+    hoverlabel: { bgcolor: "#fff", bordercolor: "#000", font: { family: css("--sans"), color: "#000" } },
+    xaxis: axis({ showgrid: false }), yaxis: axis({}),
+  }, extra);
+}
+function axis(extra) { return Object.assign({ gridcolor: css("--hair"), linecolor: "#000", zeroline: false, ticks: "outside", ticklen: 4, tickcolor: "#000", showline: true }, extra, extra.title ? { title: { text: extra.title.text, standoff: 18 } } : {}); }
+const draw = (id, traces, lay) => Plotly.react(id, traces, layout(lay), { displayModeBar: false, responsive: true });
+
+const fields = ["sMargin", "sLoss", "sMult"];
+let active = "sMargin", exact = true;  // exact: the multiplier is still the measured one, not a typed one
+const start = { sMargin: P0.margin * 100, sLoss: P0.loss_if_default * 100, sMult: +ST.multiplier.toFixed(2) };
+function reset() { for (const [id, v] of Object.entries(start)) $(id).value = v; $("sEconomy").value = "normal"; exact = true; }
+function read(id) {
+  const box = $(id), v = parseFloat(box.value);
+  return Number.isFinite(v) ? Math.min(+box.max, Math.max(+box.min, v)) : start[id];
+}
+function point(id) {
+  active = id;
+  const box = $(id), dial = $("dial");
+  fields.forEach(f => $(f).classList.toggle("on", f === id));
+  dial.min = box.min; dial.max = box.max; dial.step = box.step; dial.value = read(id);
+  $("dialLabel").textContent = "Drag to change " + box.dataset.name;
+}
+
+function fixedCharts() {
+  const names = ["My network, on my own engine", "A single neuron, on my own engine", "scikit-learn logistic regression", "scikit-learn gradient boosting", "Gradient boosting, also told sex, age, marital status and education"];
+  const scores = Object.values(D.model.comparison);
+  $("compare").innerHTML = "<thead><tr><th>Model</th><th>AUC</th></tr></thead><tbody>" +
+    names.map((n, i) => `<tr${i === 0 ? ' class="mine"' : ""}><td class="words">${n}</td><td>${scores[i].toFixed(3)}</td></tr>`).join("") + "</tbody>";
+  $("compareNote").textContent = `Mine has ${D.model.numbers} adjustable numbers. Logistic regression is the scorecard banks have used for decades and gradient boosting is usually the strongest choice. ` +
+    `The last row was given the personal details mine is not allowed to see. They added almost nothing. Banks also quote Gini (${D.model.gini.toFixed(2)}) and KS (${D.model.ks.toFixed(2)}).`;
+
+  const cal = D.calibration;
+  draw("calibration", [
+    { x: [0, 0.75], y: [0, 0.75], mode: "lines", line: { color: css("--flat"), width: 2, dash: "dash" }, hoverinfo: "skip" },
+    { x: cal.map(r => r.predicted), y: cal.map(r => r.actual), mode: "lines+markers", line: { color: "#000", width: 2 }, marker: { size: 8, color: "#000" },
+      hovertemplate: "Predicted %{x:.0%}, actual %{y:.0%}<extra></extra>" },
+  ], { xaxis: axis({ tickformat: ".0%", title: { text: "Risk the model predicted" } }), yaxis: axis({ tickformat: ".0%", title: { text: "Share who defaulted" } }) });
+
+  const R = D.recession, M = D.months;
+  const shade = spells => spells.map(s => ({ type: "rect", xref: "x", yref: "paper", x0: s.start.slice(0, 7), x1: s.end.slice(0, 7), y0: 0, y1: 1, fillcolor: "rgba(0,0,0,.13)", line: { width: 0 }, layer: "below" }));
+  draw("timeline", [
+    { x: M.month, y: M.live, mode: "lines", line: { color: css("--flat"), width: 1.2 }, hovertemplate: "%{x}: %{y:.0%} at the time<extra></extra>" },
+    { x: M.month, y: M.hindsight, mode: "lines", line: { color: "#000", width: 1.8 }, hovertemplate: "%{x}: %{y:.0%} looking back<extra></extra>" },
+  ], { shapes: shade(R.official_spells), xaxis: axis({ showgrid: false, type: "date" }), yaxis: axis({ tickformat: ".0%", range: [0, 1.02] }), hovermode: "x" });
+  const h = R.marks.hindsight, l = R.marks.live;
+  $("marks").textContent = `Marked against the official dates afterwards, it found ${h.recessions_caught} of the ${h.official_recessions} recessions, raised ${h.false_alarms} false alarm, and agreed with the official record in ${pct(h.months_agreeing)} of months. ` +
+    `Using only what was known at the time it found ${l.recessions_caught}, with ${l.false_alarms} false alarms. Its reading for ${new Date(ST.latest_month + "T12:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" })} is ${pct(ST.live_reading)}.`;
+
+  draw("losses", [{ x: D.losses.quarter, y: D.losses.written_off, mode: "lines", line: { color: "#000", width: 2 }, hovertemplate: "%{x}: %{y:.1f}%<extra></extra>" }],
+    { shapes: shade(R.spells), xaxis: axis({ showgrid: false, type: "date", range: [D.losses.quarter[0], D.losses.quarter[D.losses.quarter.length - 1]] }), yaxis: axis({ ticksuffix: "%", rangemode: "tozero" }) });
+  $("lossNote").textContent = `This is where the recession number in the sentence at the top comes from. In calm times banks wrote off ${ST.calm_written_off.toFixed(1)}% of card debt a year. In the months my model flags and the year after, it was ${ST.recession_written_off.toFixed(1)}%, which is ${ST.multiplier.toFixed(2)} times as much. ` +
+    `The losses peak after the economy does, because people run down their savings before they miss a payment.`;
+
+  $("people").innerHTML = D.examples.map(e => {
+    const rows = e.reasons.slice(0, 5).map(r => `<tr><td class="words">${r.label}</td><td class="${r.push > 0 ? "neg" : ""}">${r.push > 0 ? "+" : "−"}${Math.abs(r.push * 100).toFixed(1)}</td></tr>`).join("");
+    return `<div><h3>${pct(e.risk, 1)} risk</h3><p>${e.decision === "Lend" ? "Approved" : "Declined"}. The average customer scores ${pct(e.average_customer_risk, 1)}. In a recession this one would score ${pct(e.recession_risk, 1)}. ` +
+      `What happened: they ${e.defaulted ? "missed the next payment" : "paid"}.</p>` +
+      `<table><thead><tr><th>The five biggest reasons</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }).join("");
+}
+
+function everything() {
+  fields.forEach(id => { $(id).style.width = Math.max(String($(id).value).length, 1) + 0.25 + "ch"; });
+  const pick = $("sEconomy"); pick.style.width = pick.options[pick.selectedIndex].text.length * 0.47 + 1.15 + "em";  // the menu is only as wide as the word showing
+  const economy = $("sEconomy").value;
+  $("multWrap").hidden = economy === "normal";
+  const margin = read("sMargin") / 100, loss = read("sLoss") / 100, mult = exact ? ST.multiplier : read("sMult");
+  if (economy === "normal" && active === "sMult") point("sMargin");
+  $("dial").value = read(active);
+
+  const line = breakEven(margin, loss), hard = stress(C.risk, mult), fallback = fallbackCutoff(C.risk, hard, line);
+  const normal = lend(C, C.defaulted, line, margin, loss), everyone = lend(C, C.defaulted, 2, margin, loss);
+  const hardSame = lend(C, hard, line, margin, loss), hardFallback = lend(C, hard, fallback, margin, loss), hardEveryone = lend(C, hard, 2, margin, loss);
+  const perfect = C.defaulted.reduce((s, d, i) => s + (d ? 0 : C.balance[i] * margin), 0);
+
+  $("value").textContent = pct(economy === "normal" ? line : fallback, 1);
+  $("verdict").textContent = economy === "normal"
+    ? `That line is where the ${pct(margin, 1)} earned on a customer who pays just covers the ${pct(loss)} lost on one who does not. It approves ${pct(normal.approved)} of the test customers, ` +
+      `and ${pct(normal.defaultRate, 1)} of those went on to default. Lending to everyone would have ended in ${plain(everyone.profit)}.`
+    : `Defaults multiply by ${mult.toFixed(2)}, so a customer who scored ${pct(fallback, 1)} in calm times is now sitting on the ${pct(line, 1)} break-even line. ` +
+      `Keeping the old cutoff would be expected to end in ${plain(hardSame.profit)}. Falling back approves only ${pct(hardFallback.approved)} of customers and is expected to end in ${plain(hardFallback.profit)}.`;
+
+  const cuts = Array.from({ length: 50 }, (_, i) => (i + 1) / 50);
+  draw("curve", [
+    { x: cuts, y: cuts.map(c => lend(C, C.defaulted, c, margin, loss).profit / 1e6), mode: "lines", line: { color: "#000", width: 2.5 }, hovertemplate: "Below %{x:.0%}: NT$%{y:.1f}m<extra>Calm</extra>" },
+    { x: cuts, y: cuts.map(c => lend(C, hard, c, margin, loss).profit / 1e6), mode: "lines", line: { color: css("--loss"), width: 2.5 }, hovertemplate: "Below %{x:.0%}: NT$%{y:.1f}m<extra>Recession</extra>" },
+  ], { xaxis: axis({ tickformat: ".0%", title: { text: "Lend to everyone with a risk below" } }), yaxis: axis({ ticksuffix: "m", title: { text: "Profit, NT$" } }),
+       shapes: [[line, "#000"], [fallback, css("--loss")]].map(([x, c]) => ({ type: "line", xref: "x", yref: "paper", x0: x, x1: x, y0: 0, y1: 1, line: { color: c, width: 1.5, dash: "dot" } }))
+         .concat([{ type: "line", xref: "paper", x0: 0, x1: 1, y0: 0, y1: 0, line: { color: "#000", width: 1 } }]) });
+
+  const row = (name, a, p, mine) => `<tr${mine ? ' class="mine"' : ""}><td class="words">${name}</td><td>${a}</td><td>${money(p)}</td></tr>`;
+  $("tableNote").textContent = economy === "normal" ? `What really happened to the 6,000 test customers, who owed NT$${(P0.balance / 1e6).toFixed(0)}m between them.` : "What to expect in a recession, from the stress test.";
+  $("ways").innerHTML = "<thead><tr><th>Ways to run the book</th><th>Approved</th><th>Profit</th></tr></thead><tbody>" + (economy === "normal"
+    ? row("Lend to everyone", "100%", everyone.profit) + row(`Lend below ${pct(line, 1)} risk`, pct(normal.approved), normal.profit, true) +
+      row("A crystal ball: lend only to those who paid", pct(1 - P0.default_rate_all), perfect)
+    : row("Lend to everyone", "100%", hardEveryone.profit) + row(`Keep the calm-times cutoff, ${pct(line, 1)}`, pct(hardSame.approved), hardSame.profit) +
+      row(`Fall back to ${pct(fallback, 1)}`, pct(hardFallback.approved), hardFallback.profit, true)) + "</tbody>";
+}
+
+["sMargin", "sLoss"].forEach(id => $(id).addEventListener("input", everything));
+$("sMult").addEventListener("input", () => { exact = false; everything(); });
+fields.forEach(id => $(id).addEventListener("focus", () => point(id)));
+$("sEconomy").addEventListener("change", everything);
+$("dial").addEventListener("input", () => { $(active).value = $("dial").value; if (active === "sMult") exact = false; everything(); });
+$("reset").addEventListener("click", () => { reset(); point("sMargin"); everything(); });
+reset(); point(active);
+if (window.Plotly) { fixedCharts(); everything(); }
+else $("verdict").textContent = "The chart library did not load. Check your internet connection and reload.";
+</script>
+</body>
+</html>
